@@ -21,6 +21,7 @@ const Countries: React.FunctionComponent = () => {
       {({ loading, error, data }: QueryResult) => {
         if (loading) return <p>Loading...</p>;
         if (error) return <p>{error.message}</p>;
+        console.log(data);
         return (
           <select
             value={currentCountry.country}

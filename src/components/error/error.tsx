@@ -1,10 +1,9 @@
-import React from "react"
+import React from "react";
 
-interface IProps{
-    error: object
+interface IProps {
+  error: object;
 }
 
- const Error: React.FunctionComponent<IProps> =({error}) => (<h1> Error</h1>)
+const Error: React.FunctionComponent<IProps> = ({ error }) => <h1> Error</h1>;
 
-
- export default Error; 
+export default Error;

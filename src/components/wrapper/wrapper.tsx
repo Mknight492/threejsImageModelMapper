@@ -16,6 +16,8 @@ const Wrapper = styled.div`
   }
 `;
 
-const WrapperComponent: React.FunctionComponent = () => <Wrapper />;
+const WrapperComponent: React.FunctionComponent = ({ children }) => (
+  <Wrapper children={children} />
+);
 
 export default WrapperComponent;

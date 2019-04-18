@@ -7,3 +7,4 @@ storiesOf("Button", module)
   .add("red", () => <Button color="red" />)
   .add("blue", () => <Button color="blue" />)
   .add("green", ()=> <Button color="green" />);
+  
