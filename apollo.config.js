@@ -4,4 +4,3 @@ module.exports = {
       service: 'space-explorer',
     },
   };
-  

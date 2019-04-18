@@ -5,8 +5,8 @@ export const typeDefs= gql`
         name: string
         code: string
     }
-    type countries : {
-        countries:[country]
-    }
+    # type countries : {
+    #     countries:[country]
+    # }
     
 `
