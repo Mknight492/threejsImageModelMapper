@@ -5,24 +5,12 @@ import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 
 //graphQL imports
-import { ApolloClient } from "apollo-client";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { HttpLink } from "apollo-link-http";
-import { ApolloProvider } from "react-apollo";
-
-const cache = new InMemoryCache();
-const link = new HttpLink({
-  uri: "https://countries.trevorblades.com"
-});
-const client = new ApolloClient({
-  cache,
-  link
-});
+import CustomProvider from "./apollo/configureProvider";
 
 ReactDOM.render(
-  <ApolloProvider client={client}>
+  <CustomProvider>
     <App />
-  </ApolloProvider>,
+  </CustomProvider>,
   document.getElementById("root")
 );
 
