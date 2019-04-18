@@ -44,7 +44,10 @@
     "lint-staged": "^8.1.5",
     "pre-commit": "^1.2.2",
     "prettier": "^1.17.0",
-    "styled-components": "^4.2.0"
+    "react-testing-library": "^6.1.2",
+    "styled-components": "^4.2.0",
+    "user-event": "^2.0.1",
+    "waait": "^1.0.4"
   },
   "pre-commit": [
     "pre-commit"

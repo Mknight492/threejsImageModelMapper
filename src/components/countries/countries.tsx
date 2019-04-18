@@ -2,14 +2,7 @@ import React, { Fragment } from "react";
 import { Query, QueryResult } from "react-apollo";
 import gql from "graphql-tag";
 
-const GET_COUNTRIES = gql`
-  {
-    countries {
-      name
-      code
-    }
-  }
-`;
+import { GET_COUNTRIES } from "../../apollo/queries/countries";
 
 interface countryObj {
   code: string;
@@ -29,7 +22,11 @@ const Countries: React.FunctionComponent = () => {
         if (loading) return <p>Loading...</p>;
         if (error) return <p>{error.message}</p>;
         return (
-          <select value={currentCountry.country} onChange={onCountryChange}>
+          <select
+            value={currentCountry.country}
+            onChange={onCountryChange}
+            data-testid="CountriesSelector"
+          >
             {/*need to define a country interface */}
             {data.countries.map((country: countryObj) => (
               <option key={country.code} value={country.code}>

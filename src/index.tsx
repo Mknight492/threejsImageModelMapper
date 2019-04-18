@@ -7,8 +7,12 @@ import * as serviceWorker from "./serviceWorker";
 //graphQL imports
 import CustomProvider from "./apollo/configureProvider";
 
+//style imports
+import GlobalStyles from "./styles/globalStyles";
+
 ReactDOM.render(
   <CustomProvider>
+    <GlobalStyles />
     <App />
   </CustomProvider>,
   document.getElementById("root")
