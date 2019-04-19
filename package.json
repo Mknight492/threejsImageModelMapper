@@ -7,7 +7,15 @@
     "@types/node": "11.13.5",
     "@types/react": "16.8.13",
     "@types/react-dom": "16.8.4",
+    "apollo-cache-inmemory": "^1.5.1",
+    "apollo-client": "^2.5.1",
+    "apollo-link-http": "^1.5.14",
+    "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.12.1",
+    "graphql": "^14.2.1",
+    "graphql-tag": "^2.10.1",
     "react": "^16.8.6",
+    "react-apollo": "^2.5.4",
     "react-dom": "^16.8.6",
     "react-scripts": "2.1.8",
     "typescript": "3.4.3"
@@ -16,7 +24,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "storybook": "start-storybook --config-dir ./src/storiesConfig",
+    "pre-commit": "lint-staged"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -26,5 +36,27 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "@storybook/react": "^5.0.9",
+    "@types/enzyme": "^3.9.1",
+    "@types/storybook__react": "^4.0.1",
+    "@types/styled-components": "^4.1.14",
+    "lint-staged": "^8.1.5",
+    "pre-commit": "^1.2.2",
+    "prettier": "^1.17.0",
+    "react-testing-library": "^6.1.2",
+    "styled-components": "^4.2.0",
+    "user-event": "^2.0.1",
+    "waait": "^1.0.4"
+  },
+  "pre-commit": [
+    "pre-commit"
+  ],
+  "lint-staged": {
+    "*.tsx": [
+      "prettier --write",
+      "git add"
+    ]
+  }
 }
