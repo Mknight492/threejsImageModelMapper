@@ -38,4 +38,3 @@ html {
   }`
 
   export default GlobalStyles;
-  
