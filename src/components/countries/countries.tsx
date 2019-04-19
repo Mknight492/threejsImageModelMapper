@@ -4,6 +4,8 @@ import gql from "graphql-tag";
 
 import { GET_COUNTRIES } from "../../apollo/queries/countries";
 
+import Loading from "../../components/loading/loading";
+import Error from "../../components/error/error";
 interface countryObj {
   code: string;
   name: string;
@@ -19,8 +21,8 @@ const Countries: React.FunctionComponent = () => {
   return (
     <Query query={GET_COUNTRIES}>
       {({ loading, error, data }: QueryResult) => {
-        if (loading) return <p>Loading...</p>;
-        if (error) return <p>{error.message}</p>;
+        if (loading) return <Loading />;
+        if (error) return <Error error={error} />;
         console.log(data);
         return (
           <select

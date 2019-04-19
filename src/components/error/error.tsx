@@ -1,9 +1,13 @@
 import React from "react";
 
 interface IProps {
-  error: object;
+  error: {
+    message: string;
+  };
 }
 
-const Error: React.FunctionComponent<IProps> = ({ error }) => <h1> Error</h1>;
+const Error: React.FunctionComponent<IProps> = ({ error }) => (
+  <h1> Error: {error.message} </h1>
+);
 
 export default Error;
