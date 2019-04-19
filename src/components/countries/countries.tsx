@@ -1,6 +1,5 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { Query, QueryResult } from "react-apollo";
-import gql from "graphql-tag";
 
 import { GET_COUNTRIES } from "../../apollo/queries/countries";
 
@@ -23,7 +22,6 @@ const Countries: React.FunctionComponent = () => {
       {({ loading, error, data }: QueryResult) => {
         if (loading) return <Loading />;
         if (error) return <Error error={error} />;
-        console.log(data);
         return (
           <select
             value={currentCountry.country}

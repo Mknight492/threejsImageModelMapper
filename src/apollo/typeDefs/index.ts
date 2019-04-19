@@ -1,15 +1,12 @@
-import gql from 'graphql-tag';
+import gql from "graphql-tag";
 
-export const typeDefs= gql`
-    type Country{
-        name: string!
-        code: string!
-    }
+export const typeDefs = gql`
+  type Country {
+    name: string!
+    code: string!
+  }
 
-type NewType{
-    obj:object
-}
-    type Query {
-        countries: [NewType!]!
-    }
-`
+  type countries {
+    countries: [Country!]!
+  }
+`;

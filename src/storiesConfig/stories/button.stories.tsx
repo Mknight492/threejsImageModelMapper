@@ -1,7 +1,7 @@
 import React from "react";
 import { storiesOf } from "@storybook/react";
 
-import Button from "../components/buttons/button";
+import Button from "../../components/buttons/button";
 
 storiesOf("Button", module)
   .add("red", () => <Button color="red" />)

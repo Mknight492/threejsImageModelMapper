@@ -1,7 +1,7 @@
-import gql from "graphql-tag"
+import gql from "graphql-tag";
 
 const GET_COUNTRIES = gql`
-  query getCountries{
+  query getCountries {
     countries {
       name
       code
@@ -9,4 +9,4 @@ const GET_COUNTRIES = gql`
   }
 `;
 
-export{GET_COUNTRIES}
+export { GET_COUNTRIES };
