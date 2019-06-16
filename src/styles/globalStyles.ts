@@ -1,4 +1,4 @@
-import{createGlobalStyle} from "styled-components"
+import { createGlobalStyle } from "styled-components";
 
 const GlobalStyles = createGlobalStyle`
 html {
@@ -15,6 +15,8 @@ html {
     line-height: 1.65;
     box-sizing: border-box;
     scroll-behavior: smooth;
+    width: 100%;
+    height: 100%;
   }
   button:focus {
     outline: 0;
@@ -35,6 +37,12 @@ html {
     padding: 0;
     margin: 0;
     box-sizing: inherit;
-  }`
+  }
+  
+  #root{
+    width: 100%;
+    height: 100%;
+  }
+  `;
 
-  export default GlobalStyles;
+export default GlobalStyles;

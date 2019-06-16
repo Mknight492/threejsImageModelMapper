@@ -1,14 +1,13 @@
 import React, { Component } from "react";
 
-import CountrySelect from "./components/countries/countries";
-
-import Button from "./components/buttons/button";
+import Glasses from "./pages/glasses/scratch";
+import Test from "./pages/glasses/container";
 class App extends Component {
   render() {
     return (
       <>
-        <CountrySelect />
-        <Button color="pink" />
+        <Test />
+        <Glasses />
       </>
     );
   }
