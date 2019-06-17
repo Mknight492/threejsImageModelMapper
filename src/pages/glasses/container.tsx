@@ -10,7 +10,7 @@ const initialState: IThreeDPosition = {
   position: {
     x: 0,
     y: 0,
-    z: 0
+    z: 10
   },
   rotation: {
     x: 0,
@@ -18,9 +18,9 @@ const initialState: IThreeDPosition = {
     z: 0
   },
   scale: {
-    x: 1,
-    y: 1,
-    z: 1
+    x: 40,
+    y: 40,
+    z: 40
   }
 };
 
@@ -29,14 +29,20 @@ const ImageToModalMapper = () => {
 
   const handleChange = (
     field: keyof IThreeDPosition,
-    position: keyof ICordinates
+    position: keyof ICoordinates
   ) => (event: React.ChangeEvent<HTMLInputElement>) => {
     // state[field][position] = parseFloat(event.target.value)
     event.persist();
     setState(state => {
       //   debugger;
       const newState = { ...state };
-      newState[field][position] = parseFloat(event.target.value) || "";
+      const { value } = event.target;
+      let finalValue = isNaN((value as unknown) as number)
+        ? 0
+        : parseFloat(event.target.value);
+
+      newState[field][position] = finalValue;
+
       return newState;
     });
   };
@@ -46,7 +52,7 @@ const ImageToModalMapper = () => {
       <Box>
         <Title>Image 1</Title>
         <Row>
-          <Test />
+          <Test {...state} />
           <Positions>
             <h3> Position</h3>
             <label htmlFor="positionx">x</label>
@@ -151,13 +157,13 @@ const Positions = styled.div`
   flex-direction: column;
 `;
 
-interface IThreeDPosition {
-  position: ICordinates;
-  rotation: ICordinates;
-  scale: ICordinates;
+export interface IThreeDPosition {
+  position: ICoordinates;
+  rotation: ICoordinates;
+  scale: ICoordinates;
 }
 
-interface ICordinates {
+export interface ICoordinates {
   x: number | "";
   y: number | "";
   z: number | "";

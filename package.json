@@ -7,6 +7,7 @@
     "@types/node": "11.13.5",
     "@types/react": "16.8.13",
     "@types/react-dom": "16.8.4",
+    "@types/three": "^0.103.2",
     "apollo-cache-inmemory": "^1.5.1",
     "apollo-client": "^2.5.1",
     "apollo-link-http": "^1.5.14",
@@ -20,6 +21,9 @@
     "react-scripts": "^3.0.1",
     "react-sizeme": "^2.6.7",
     "three": "^0.105.2",
+    "three-orbitcontrols": "^2.102.1",
+    "three-transform-controls": "^1.0.4",
+    "threejs-transformcontrols": "^0.83.0",
     "typescript": "3.4.3"
   },
   "scripts": {

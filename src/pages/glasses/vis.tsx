@@ -4,21 +4,34 @@ import * as THREE from "three";
 //helpers
 import { SizeMe } from "react-sizeme";
 
-const Vis = () => {
+//models
+import { IThreeDPosition } from "./container";
+
+var TransformControls = require("three-transform-controls")(THREE);
+const OrbitControls = require("three-orbitcontrols");
+
+const Vis: React.FunctionComponent<IThreeDPosition> = ({
+  position,
+  rotation,
+  scale
+}) => {
   const mount = useRef<any>(null);
   const [isAnimating, setAnimating] = useState(true);
   const controls = useRef<any>(null);
 
   const imageAspectRatio = 3 / 4;
 
+  const [glasses, setGlasses] = useState<any>();
+  //   let glasses: THREE.Object3D;
+
   useLayoutEffect(() => {
     let width = mount.current.getBoundingClientRect().width;
     let height = width * imageAspectRatio;
     let frameId: any;
 
-    var fieldOfView = 100;
-    var nearPlane = 0.1;
-    var farPlane = 1000;
+    let fieldOfView = 100;
+    let nearPlane = 0.1;
+    let farPlane = 1000;
 
     const imageZ = 0;
     let modelZ = 10;
@@ -34,23 +47,33 @@ const Vis = () => {
     camera.position.z = 40;
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-    var imgHeight = visibleHeightAtZDepth(0, camera); // visible height
-    var imgWidth = imgHeight * camera.aspect; // visible width
+    let imgHeight = visibleHeightAtZDepth(0, camera); // visible height
+    let imgWidth = imgHeight * camera.aspect; // visible width
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.autoClear = false;
+    mount.current.appendChild(renderer.domElement);
+    window.addEventListener("resize", handleResize);
 
-    let glasses: THREE.Object3D;
+    //Transform controls && orbit controls
+    const orbit = new OrbitControls(camera, renderer.domElement);
+    orbit.update();
+    orbit.addEventListener("change", renderScene);
+
+    const control = new TransformControls(camera, renderer.domElement);
+    control.addEventListener("change", renderScene);
+    control.addEventListener("dragging-changed", function(event: any) {
+      orbit.enabled = !event.value;
+    });
+
     const addObject = (objectToAdd: THREE.Object3D) => {
-      //   let box = new THREE.Box3().setFromObject(objectToAdd);
       let scale = 40;
-
-      objectToAdd.scale.set(scale, scale, scale);
-      objectToAdd.position.z = modelZ;
-      //   objectToAdd.rotation.y = 1;
-      //   objectToAdd.rotation.x = 1;
+      objectToAdd.scale.set(scale * imageAspectRatio, scale, scale);
       scene!.add(objectToAdd);
-      glasses = objectToAdd;
+      setGlasses(objectToAdd);
+      control.attach(objectToAdd);
+      control.scale.set(80, 80, 80);
+      scene.add(control);
     };
 
     const web =
@@ -69,7 +92,9 @@ const Vis = () => {
         "https://s3.amazonaws.com/duhaime/blog/tsne-webgl/assets/cat.jpg"
       )
     });
-
+    var imageMaterial2 = new THREE.MeshLambertMaterial({
+      map: imageLoader.load("")
+    });
     // deterime what is visable fgrom the camera and make the image equal to that size
 
     console.log(imgWidth); //
@@ -77,31 +102,34 @@ const Vis = () => {
 
     // combine our image geometry and material into a mesh
     var mesh = new THREE.Mesh(imageGeometry, imageMaterial);
+    var mesh2 = new THREE.Mesh(imageGeometry, imageMaterial);
 
     // set the position of the image mesh in the x,y,z dimensions
     mesh.position.set(0, 0, imageZ);
+    mesh2.position.set(0, 0, 1);
 
     // add the image to the scene
-    scene2.add(mesh);
+    //scene.add(mesh);
+    scene2.add(mesh); //need to overcome
 
     var amb = new THREE.AmbientLight(0xffffff, 1);
     scene2.add(amb);
 
     renderer.setSize(width, height);
 
-    const renderScene = () => {
-      renderer.render(scene, camera);
+    function renderScene() {
       renderer.render(scene2, camera);
-    };
+      renderer.render(scene, camera);
+    }
 
-    const handleResize = () => {
+    function handleResize() {
       width = mount.current.getBoundingClientRect().width;
       height = width * imageAspectRatio;
       renderer.setSize(width, height);
       camera.updateProjectionMatrix();
 
       renderScene();
-    };
+    }
 
     const animate = () => {
       if (glasses && glasses.rotation && glasses.rotation.y !== null) {
@@ -125,8 +153,6 @@ const Vis = () => {
       frameId = null;
     };
 
-    mount.current.appendChild(renderer.domElement);
-    window.addEventListener("resize", handleResize);
     start();
 
     controls.current = { start, stop };
@@ -150,6 +176,33 @@ const Vis = () => {
       controls.current.stop();
     }
   }, [isAnimating]);
+
+  useLayoutEffect(() => {
+    console.log("effect");
+
+    if (glasses && position) {
+      glasses.position.x = position.x || 0;
+      glasses.position.y = position.y || 0;
+      glasses.position.z = position.z || 0;
+      glasses.rotation.x = rotation.x || 0;
+      glasses.rotation.y = rotation.y || 0;
+      glasses.rotation.z = rotation.z || 0;
+      glasses.scale.x = scale.x || 0;
+      glasses.scale.y = scale.y || 0;
+      glasses.scale.z = scale.z || 0;
+    }
+  }, [
+    position.x,
+    position.y,
+    position.z,
+    rotation.x,
+    rotation.y,
+    rotation.z,
+    scale.x,
+    scale.y,
+    scale.z,
+    glasses
+  ]);
 
   return (
     <div style={{ width: "100%" }}>
