@@ -26,6 +26,9 @@ const initialState: IThreeDPosition = {
 
 const ImageToModalMapper = () => {
   const [state, setState] = useState(initialState);
+  const [gizmoState, setStateGizmoState] = useState<ITransformControlsType>(
+    "translate"
+  );
 
   const handleChange = (
     field: keyof IThreeDPosition,
@@ -37,11 +40,14 @@ const ImageToModalMapper = () => {
       //   debugger;
       const newState = { ...state };
       const { value } = event.target;
-      let finalValue = isNaN((value as unknown) as number)
-        ? 0
-        : parseFloat(event.target.value);
+      if (value === "-") newState[field][position] = "-";
+      else {
+        let finalValue = isNaN((value as unknown) as number)
+          ? 0
+          : parseFloat(event.target.value);
 
-      newState[field][position] = finalValue;
+        newState[field][position] = finalValue;
+      }
 
       return newState;
     });
@@ -52,7 +58,11 @@ const ImageToModalMapper = () => {
       <Box>
         <Title>Image 1</Title>
         <Row>
-          <Test {...state} />
+          <Test
+            ThreeDPosition={{ ...state }}
+            setState={setState}
+            gizmoState={gizmoState}
+          />
           <Positions>
             <h3> Position</h3>
             <label htmlFor="positionx">x</label>
@@ -120,6 +130,35 @@ const ImageToModalMapper = () => {
               value={state.scale.z}
               type="number"
             />
+            <button
+              onClick={() => {
+                setStateGizmoState("translate");
+              }}
+            >
+              translate
+            </button>
+            <button
+              onClick={() => {
+                setStateGizmoState("rotate");
+              }}
+            >
+              rotate
+            </button>
+            <button
+              onClick={() => {
+                setStateGizmoState("scale");
+              }}
+            >
+              scale
+            </button>
+            <button
+              onClick={() => {
+                setState(initialState);
+              }}
+            >
+              {" "}
+              reset{" "}
+            </button>
           </Positions>
         </Row>
       </Box>
@@ -164,9 +203,11 @@ export interface IThreeDPosition {
 }
 
 export interface ICoordinates {
-  x: number | "";
-  y: number | "";
-  z: number | "";
+  x: number | "" | "-";
+  y: number | "" | "-";
+  z: number | "" | "-";
 }
+
+export type ITransformControlsType = "translate" | "rotate" | "scale";
 
 export default ImageToModalMapper;

@@ -1,20 +1,35 @@
-import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  Dispatch,
+  SetStateAction
+} from "react";
 import * as THREE from "three";
 
 //helpers
 import { SizeMe } from "react-sizeme";
 
 //models
-import { IThreeDPosition } from "./container";
+import { IThreeDPosition, ITransformControlsType } from "./container";
 
 var TransformControls = require("three-transform-controls")(THREE);
 const OrbitControls = require("three-orbitcontrols");
 
-const Vis: React.FunctionComponent<IThreeDPosition> = ({
-  position,
-  rotation,
-  scale
+interface IState {
+  ThreeDPosition: IThreeDPosition;
+  setState: Dispatch<SetStateAction<IThreeDPosition>>;
+  gizmoState: ITransformControlsType;
+}
+
+const Vis: React.FunctionComponent<IState> = ({
+  ThreeDPosition,
+  setState,
+  gizmoState
 }) => {
+  const { position, rotation, scale } = ThreeDPosition;
+
   const mount = useRef<any>(null);
   const [isAnimating, setAnimating] = useState(true);
   const controls = useRef<any>(null);
@@ -22,8 +37,10 @@ const Vis: React.FunctionComponent<IThreeDPosition> = ({
   const imageAspectRatio = 3 / 4;
 
   const [glasses, setGlasses] = useState<any>();
+  const gizmo = useRef<any>(null);
   //   let glasses: THREE.Object3D;
 
+  // this function is called once on component mounting and sets up the threejs canvas
   useLayoutEffect(() => {
     let width = mount.current.getBoundingClientRect().width;
     let height = width * imageAspectRatio;
@@ -52,28 +69,55 @@ const Vis: React.FunctionComponent<IThreeDPosition> = ({
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.autoClear = false;
+    renderer.setSize(width, height);
     mount.current.appendChild(renderer.domElement);
     window.addEventListener("resize", handleResize);
 
     //Transform controls && orbit controls
-    const orbit = new OrbitControls(camera, renderer.domElement);
-    orbit.update();
-    orbit.addEventListener("change", renderScene);
+
+    // const orbit = new OrbitControls(camera, renderer.domElement);
+    // orbit.update();
+    // orbit.addEventListener("change", renderScene);
 
     const control = new TransformControls(camera, renderer.domElement);
     control.addEventListener("change", renderScene);
-    control.addEventListener("dragging-changed", function(event: any) {
-      orbit.enabled = !event.value;
-    });
+    gizmo.current = control;
 
-    const addObject = (objectToAdd: THREE.Object3D) => {
+    // control.addEventListener("dragging-changed", function(event: any) {
+    //   orbit.enabled = !event.value;
+    // });
+
+    const updateState = (glasses: THREE.Object3D) => () => {
+      setState({
+        position: {
+          x: glasses.position.x,
+          y: glasses.position.y,
+          z: glasses.position.z
+        },
+        rotation: {
+          x: glasses.rotation.x,
+          y: glasses.rotation.y,
+          z: glasses.rotation.z
+        },
+        scale: {
+          x: glasses.scale.x,
+          y: glasses.scale.y,
+          z: glasses.scale.z
+        }
+      });
+    };
+
+    const addObject = async (objectToAdd: THREE.Object3D) => {
       let scale = 40;
       objectToAdd.scale.set(scale * imageAspectRatio, scale, scale);
-      scene!.add(objectToAdd);
-      setGlasses(objectToAdd);
+
+      await setGlasses(objectToAdd);
       control.attach(objectToAdd);
-      control.scale.set(80, 80, 80);
+      //   control.scale.set(80, 80, 80);
+
       scene.add(control);
+      scene!.add(objectToAdd);
+      control.addEventListener("change", updateState(objectToAdd));
     };
 
     const web =
@@ -115,8 +159,6 @@ const Vis: React.FunctionComponent<IThreeDPosition> = ({
     var amb = new THREE.AmbientLight(0xffffff, 1);
     scene2.add(amb);
 
-    renderer.setSize(width, height);
-
     function renderScene() {
       renderer.render(scene2, camera);
       renderer.render(scene, camera);
@@ -127,17 +169,10 @@ const Vis: React.FunctionComponent<IThreeDPosition> = ({
       height = width * imageAspectRatio;
       renderer.setSize(width, height);
       camera.updateProjectionMatrix();
-
       renderScene();
     }
 
     const animate = () => {
-      if (glasses && glasses.rotation && glasses.rotation.y !== null) {
-        // glasses.rotation.x += 0.03;
-        // glasses.rotation.z += 0.02;
-        // glasses.rotation.y += 0.01;
-      }
-
       renderScene();
       frameId = window.requestAnimationFrame(animate);
     };
@@ -161,7 +196,6 @@ const Vis: React.FunctionComponent<IThreeDPosition> = ({
       stop();
       window.removeEventListener("resize", handleResize);
       mount.current.removeChild(renderer.domElement);
-
       scene.remove(glasses);
       scene.remove(mesh);
       imageGeometry.dispose();
@@ -169,13 +203,13 @@ const Vis: React.FunctionComponent<IThreeDPosition> = ({
     };
   }, ["USE_ONCE"]);
 
-  useLayoutEffect(() => {
-    if (isAnimating) {
-      controls.current.start();
-    } else {
-      controls.current.stop();
-    }
-  }, [isAnimating]);
+  //   useLayoutEffect(() => {
+  //     if (isAnimating) {
+  //       controls.current.start();
+  //     } else {
+  //       controls.current.stop();
+  //     }
+  //   }, [isAnimating]);
 
   useLayoutEffect(() => {
     console.log("effect");
@@ -204,6 +238,10 @@ const Vis: React.FunctionComponent<IThreeDPosition> = ({
     glasses
   ]);
 
+  useLayoutEffect(() => {
+    gizmo.current.setMode(gizmoState);
+  }, [gizmoState]);
+
   return (
     <div style={{ width: "100%" }}>
       <div
@@ -215,6 +253,8 @@ const Vis: React.FunctionComponent<IThreeDPosition> = ({
     </div>
   );
 };
+
+//helpers
 
 const visibleHeightAtZDepth = (depth: any, camera: any) => {
   // compensate for cameras not positioned at z=0
