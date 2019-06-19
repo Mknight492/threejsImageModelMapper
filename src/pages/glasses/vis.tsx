@@ -36,19 +36,17 @@ const Vis: React.FunctionComponent<IState> = ({
 }) => {
   const { position, rotation, scale } = ThreeDPosition;
 
-  const [model, setStateModel] = useState<any>();
   const [imageAspectRatio, setStateAspectRatio] = useState<number>(0);
 
   const mount = useRef<any>(null);
-
   const gizmo = useRef<any>(null); // reference to the transformcontrols/gizmo
-
   const currentImage = useRef<any>(null);
+  const currentModel = useRef<any>(null);
+
   // this function is called once on component mounting and sets up the threejs canvas
   useLayoutEffect(() => {
-    const { width, height } = determineWidthAndHeight(imageAspectRatio);
-
     let frameId: any;
+
     let fieldOfView = 100;
     let nearPlane = 0.1;
     let farPlane = 1000;
@@ -80,8 +78,10 @@ const Vis: React.FunctionComponent<IState> = ({
 
     const addObject = (objectToAdd: THREE.Object3D) => {
       let scale = 40;
+      // - the scale might need to change based on the current image Aspect ratio
+      console.log(imageAspectRatio);
       objectToAdd.scale.set(scale, scale, scale);
-      setStateModel(objectToAdd);
+      currentModel.current = objectToAdd;
       control.attach(objectToAdd);
 
       modelScene.add(control);
@@ -96,8 +96,13 @@ const Vis: React.FunctionComponent<IState> = ({
       "https://s3-us-west-1.amazonaws.com/glassesobjects/glasses/object_json_files/3Dviewer.json";
     const normal = "./3/glasses2.json";
 
+    const alt =
+      "https://images.pexels.com/photos/248797/pexels-photo-248797.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500";
+    const caturl =
+      "https://s3.amazonaws.com/duhaime/blog/tsne-webgl/assets/cat.jpg";
+
     //glasses loader
-    let json_path = normal;
+    let json_path = web;
     const loader = new THREE.ObjectLoader();
     loader.load(json_path, addObject);
 
@@ -105,22 +110,25 @@ const Vis: React.FunctionComponent<IState> = ({
     var imageLoader = new THREE.TextureLoader();
 
     var imageMaterial = new THREE.MeshLambertMaterial({
-      map: imageLoader.load(
-        "https://s3.amazonaws.com/duhaime/blog/tsne-webgl/assets/cat.jpg",
-        function(img) {
-          //   window.removeEventListener("resize", handleResize(imageAspectRatio));
-          let imageRatio = img.image.naturalHeight / img.image.naturalWidth;
-          setStateAspectRatio(imageRatio);
-          camera.aspect = img.image.naturalHeight / img.image.naturalWidth;
+      map: imageLoader.load(alt, function(img) {
+        //   window.removeEventListener("resize", handleResize(imageAspectRatio));
+        let imageRatio = img.image.naturalHeight / img.image.naturalWidth;
+        setStateAspectRatio(imageRatio);
 
-          let imgHeight = visibleHeightAtZDepth(0, camera); // visible height
-          let imgWidth = (imgHeight * 3) / 4; //imageAspectRatio; // visible width
-
-          window.addEventListener("resize", handleResize(imageRatio));
-          mesh.scale.set(imgWidth, imgHeight, 1);
-          handleResize(imageRatio)();
-        }
-      )
+        let imgHeight = visibleHeightAtZDepth(0, camera); // visible height
+        let imgWidth = (imgHeight * 3) / 4; //imageAspectRatio; // visible width
+        let scale = 40;
+        // currentModel.current.scale.set(
+        //   scale / imageRatio,
+        //   scale * imageRatio,
+        //   scale
+        // );
+        //
+        window.addEventListener("resize", handleResize(imageRatio));
+        mesh.scale.set(imgWidth, imgHeight, 1);
+        handleResize(imageRatio)();
+        scaleModel(imageRatio);
+      })
     });
     var imageGeometry = new THREE.PlaneGeometry(1, 1);
 
@@ -144,6 +152,7 @@ const Vis: React.FunctionComponent<IState> = ({
     function handleResize(imageAspectRatio: any) {
       return function() {
         const { width, height } = determineWidthAndHeight(imageAspectRatio);
+        camera.aspect = imageAspectRatio;
         renderer.setSize(width, height);
         camera.updateProjectionMatrix();
         renderScene();
@@ -188,7 +197,7 @@ const Vis: React.FunctionComponent<IState> = ({
       stop();
       window.removeEventListener("resize", handleResize);
       mount.current.removeChild(renderer.domElement);
-      modelScene.remove(model);
+      modelScene.remove(currentModel.current);
       modelScene.remove(mesh);
       imageGeometry.dispose();
       imageMaterial.dispose();
@@ -196,16 +205,16 @@ const Vis: React.FunctionComponent<IState> = ({
   }, ["USE_ONCE"]);
 
   useLayoutEffect(() => {
-    if (model && position) {
-      model.position.x = position.x || 0;
-      model.position.y = position.y || 0;
-      model.position.z = position.z || 0;
-      model.rotation.x = degreesToRadians(rotation.x) || 0;
-      model.rotation.y = degreesToRadians(rotation.y) || 0;
-      model.rotation.z = degreesToRadians(rotation.z) || 0;
-      model.scale.x = scale.x || 40;
-      model.scale.y = scale.y || 40;
-      model.scale.z = scale.z || 40;
+    if (currentModel && currentModel.current && position) {
+      currentModel.current.position.x = position.x || 0;
+      currentModel.current.position.y = position.y || 0;
+      currentModel.current.position.z = position.z || 10;
+      currentModel.current.rotation.x = degreesToRadians(rotation.x) || 0;
+      currentModel.current.rotation.y = degreesToRadians(rotation.y) || 0;
+      currentModel.current.rotation.z = degreesToRadians(rotation.z) || 0;
+      currentModel.current.scale.x = scale.x || 40;
+      currentModel.current.scale.y = scale.y || 40;
+      currentModel.current.scale.z = scale.z || 40;
     }
   }, [
     position.x,
@@ -217,14 +226,28 @@ const Vis: React.FunctionComponent<IState> = ({
     scale.x,
     scale.y,
     scale.z,
-    model
+    currentModel.current
   ]);
+
+  useLayoutEffect(() => {
+    scaleModel(imageAspectRatio);
+  }, [currentModel.current]);
 
   useLayoutEffect(() => {
     gizmo.current.setMode(gizmoState);
   }, [gizmoState]);
 
   useLayoutEffect(() => {}, [currentImage.current]);
+
+  function scaleModel(imageRatio: number) {
+    let scale = 40;
+    if (currentModel.current)
+      currentModel.current.scale.set(
+        scale * imageRatio,
+        scale / imageRatio,
+        scale
+      );
+  }
 
   return (
     <div style={{ width: "100%" }}>
