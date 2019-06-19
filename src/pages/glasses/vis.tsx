@@ -20,8 +20,8 @@ import {
 
 import styled from "styled-components";
 
+//the transfor controls aren't exported from "three" so have to be imported like so
 var TransformControls = require("three-transform-controls")(THREE);
-// const OrbitControls = require("three-orbitcontrols");
 
 interface IState {
   ThreeDPosition: IThreeDPosition;
@@ -36,42 +36,28 @@ const Vis: React.FunctionComponent<IState> = ({
 }) => {
   const { position, rotation, scale } = ThreeDPosition;
 
-  const [glasses, setGlasses] = useState<any>();
+  const [model, setStateModel] = useState<any>();
   const [imageAspectRatio, setStateAspectRatio] = useState<number>(0);
 
   const mount = useRef<any>(null);
 
-  const controls = useRef<any>(null);
+  const gizmo = useRef<any>(null); // reference to the transformcontrols/gizmo
 
-  const gizmo = useRef<any>(null);
-
+  const currentImage = useRef<any>(null);
   // this function is called once on component mounting and sets up the threejs canvas
   useLayoutEffect(() => {
-    let width = mount.current.getBoundingClientRect().width;
-    let height = width * imageAspectRatio;
-    var w = Math.max(
-      document.documentElement.clientWidth,
-      window.innerWidth || 0
-    );
-    var h =
-      Math.max(document.documentElement.clientHeight, window.innerHeight || 0) -
-      40; //this is the height of the title
-
-    const reduceScale = height > h ? height / h : 1;
-    width = width / reduceScale;
-    height = height / reduceScale;
+    const { width, height } = determineWidthAndHeight(imageAspectRatio);
 
     let frameId: any;
-
     let fieldOfView = 100;
     let nearPlane = 0.1;
     let farPlane = 1000;
-
     const imageZ = 0;
-    let modelZ = 10;
 
-    const scene = new THREE.Scene();
-    const scene2 = new THREE.Scene();
+    //initialising two scenes so that model lights don't affect the image lighting
+    const modelScene = new THREE.Scene();
+    const imageScene = new THREE.Scene();
+
     const camera = new THREE.PerspectiveCamera(
       fieldOfView,
       imageAspectRatio,
@@ -81,62 +67,29 @@ const Vis: React.FunctionComponent<IState> = ({
     camera.position.z = 40;
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-    let imgHeight = visibleHeightAtZDepth(0, camera); // visible height
-    let imgWidth = imgHeight * camera.aspect; // visible width
-
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.autoClear = false;
-    renderer.setSize(width, height);
     renderer.setPixelRatio(window.devicePixelRatio);
     mount.current.appendChild(renderer.domElement);
-    window.addEventListener("resize", handleResize);
 
-    //Transform controls && orbit controls
-
-    // const orbit = new OrbitControls(camera, renderer.domElement);
-    // orbit.update();
-    // orbit.addEventListener("change", renderScene);
-
+    //Transform controls
     const control = new TransformControls(camera, renderer.domElement);
     control.addEventListener("change", renderScene);
-    gizmo.current = control;
     control.scope = "local";
+    gizmo.current = control; //add reference to the controls so can be used out of
 
-    // control.addEventListener("dragging-changed", function(event: any) {
-    //   orbit.enabled = !event.value;
-    // });
-
-    const updateState = (glasses: THREE.Object3D) => () => {
-      setState({
-        position: {
-          x: glasses.position.x,
-          y: glasses.position.y,
-          z: glasses.position.z
-        },
-        rotation: {
-          x: radiansToDegrees(glasses.rotation.x),
-          y: radiansToDegrees(glasses.rotation.y),
-          z: radiansToDegrees(glasses.rotation.z)
-        },
-        scale: {
-          x: glasses.scale.x,
-          y: glasses.scale.y,
-          z: glasses.scale.z
-        }
-      });
-    };
-
-    const addObject = async (objectToAdd: THREE.Object3D) => {
+    const addObject = (objectToAdd: THREE.Object3D) => {
       let scale = 40;
       objectToAdd.scale.set(scale, scale, scale);
-
-      await setGlasses(objectToAdd);
+      setStateModel(objectToAdd);
       control.attach(objectToAdd);
-      //   control.scale.set(80, 80, 80);
 
-      scene.add(control);
-      scene!.add(objectToAdd);
-      control.addEventListener("change", updateState(objectToAdd));
+      modelScene.add(control);
+      modelScene!.add(objectToAdd);
+      control.addEventListener(
+        "change",
+        mapModelToState(objectToAdd, setState)
+      );
     };
 
     const web =
@@ -148,75 +101,69 @@ const Vis: React.FunctionComponent<IState> = ({
     const loader = new THREE.ObjectLoader();
     loader.load(json_path, addObject);
 
-    //image loader
+    let mesh: any;
     var imageLoader = new THREE.TextureLoader();
-    var imageLaded = imageLoader.load(
-      "https://s3.amazonaws.com/duhaime/blog/tsne-webgl/assets/cat.jpg",
-      function(img) {
-        console.log(img.image.naturalHeight / img.image.naturalWidth);
-        setStateAspectRatio(img.image.naturalHeight / img.image.naturalWidth);
-        camera.aspect = img.image.naturalHeight / img.image.naturalWidth;
-        camera.updateProjectionMatrix();
-        renderer.setSize(width, height);
-        //need to see the aspect ratio here.
-        // therefore can be dynamic
-      }
-    );
 
     var imageMaterial = new THREE.MeshLambertMaterial({
       map: imageLoader.load(
-        "https://s3.amazonaws.com/duhaime/blog/tsne-webgl/assets/cat.jpg"
+        "https://s3.amazonaws.com/duhaime/blog/tsne-webgl/assets/cat.jpg",
+        function(img) {
+          //   window.removeEventListener("resize", handleResize(imageAspectRatio));
+          let imageRatio = img.image.naturalHeight / img.image.naturalWidth;
+          setStateAspectRatio(imageRatio);
+          camera.aspect = img.image.naturalHeight / img.image.naturalWidth;
+
+          let imgHeight = visibleHeightAtZDepth(0, camera); // visible height
+          let imgWidth = (imgHeight * 3) / 4; //imageAspectRatio; // visible width
+
+          window.addEventListener("resize", handleResize(imageRatio));
+          mesh.scale.set(imgWidth, imgHeight, 1);
+          handleResize(imageRatio)();
+        }
       )
     });
-    var imageMaterial2 = new THREE.MeshLambertMaterial({
-      map: imageLoader.load("")
-    });
-    // deterime what is visable fgrom the camera and make the image equal to that size
-    // console.log(imageLaded);
-    // console.log(imgWidth); //
-    var imageGeometry = new THREE.PlaneGeometry(imgWidth, imgHeight);
+    var imageGeometry = new THREE.PlaneGeometry(1, 1);
 
     // combine our image geometry and material into a mesh
-    var mesh = new THREE.Mesh(imageGeometry, imageMaterial);
-    var mesh2 = new THREE.Mesh(imageGeometry, imageMaterial);
+    mesh = new THREE.Mesh(imageGeometry, imageMaterial);
 
     // set the position of the image mesh in the x,y,z dimensions
     mesh.position.set(0, 0, imageZ);
-    mesh2.position.set(0, 0, 1);
-
+    mesh.geometry = new THREE.PlaneGeometry(1, 1);
     // add the image to the scene
-    //scene.add(mesh);
-    scene2.add(mesh); //need to overcome
+    imageScene.add(mesh); //need to overcome
 
     var amb = new THREE.AmbientLight(0xffffff, 1);
-    scene2.add(amb);
+    imageScene.add(amb);
 
     function renderScene() {
-      renderer.render(scene2, camera);
-      renderer.render(scene, camera);
+      renderer.render(imageScene, camera);
+      renderer.render(modelScene, camera);
     }
 
-    function handleResize() {
-      width = mount.current.getBoundingClientRect().width;
-      height = width * imageAspectRatio;
+    function handleResize(imageAspectRatio: any) {
+      return function() {
+        const { width, height } = determineWidthAndHeight(imageAspectRatio);
+        renderer.setSize(width, height);
+        camera.updateProjectionMatrix();
+        renderScene();
+      };
+    }
 
-      var w = Math.max(
-        document.documentElement.clientWidth,
-        window.innerWidth || 0
-      );
-      var h =
+    function determineWidthAndHeight(imageAspectRatio: any) {
+      let width = mount.current.getBoundingClientRect().width;
+      let height = width * imageAspectRatio;
+      var viewportHeight =
         Math.max(
           document.documentElement.clientHeight,
           window.innerHeight || 0
-        ) - 40; //this is the height of the title
+        ) - 40;
+      var maxHeight = viewportHeight - 40; //this is the height of the title
 
-      const reduceScale = height > h ? height / h : 1;
+      const reduceScale = height > maxHeight ? height / maxHeight : 1;
       width = width / reduceScale;
       height = height / reduceScale;
-
-      renderer.setSize(width, height);
-      camera.updateProjectionMatrix();
-      renderScene();
+      return { width, height };
     }
 
     const animate = () => {
@@ -237,40 +184,28 @@ const Vis: React.FunctionComponent<IState> = ({
 
     start();
 
-    controls.current = { start, stop };
-
     return () => {
       stop();
       window.removeEventListener("resize", handleResize);
       mount.current.removeChild(renderer.domElement);
-      scene.remove(glasses);
-      scene.remove(mesh);
+      modelScene.remove(model);
+      modelScene.remove(mesh);
       imageGeometry.dispose();
       imageMaterial.dispose();
     };
   }, ["USE_ONCE"]);
 
-  //   useLayoutEffect(() => {
-  //     if (isAnimating) {
-  //       controls.current.start();
-  //     } else {
-  //       controls.current.stop();
-  //     }
-  //   }, [isAnimating]);
-
   useLayoutEffect(() => {
-    console.log("effect");
-
-    if (glasses && position) {
-      glasses.position.x = position.x || 0;
-      glasses.position.y = position.y || 0;
-      glasses.position.z = position.z || 0;
-      glasses.rotation.x = degreesToRadians(rotation.x) || 0;
-      glasses.rotation.y = degreesToRadians(rotation.y) || 0;
-      glasses.rotation.z = degreesToRadians(rotation.z) || 0;
-      glasses.scale.x = scale.x || 40;
-      glasses.scale.y = scale.y || 40;
-      glasses.scale.z = scale.z || 40;
+    if (model && position) {
+      model.position.x = position.x || 0;
+      model.position.y = position.y || 0;
+      model.position.z = position.z || 0;
+      model.rotation.x = degreesToRadians(rotation.x) || 0;
+      model.rotation.y = degreesToRadians(rotation.y) || 0;
+      model.rotation.z = degreesToRadians(rotation.z) || 0;
+      model.scale.x = scale.x || 40;
+      model.scale.y = scale.y || 40;
+      model.scale.z = scale.z || 40;
     }
   }, [
     position.x,
@@ -282,24 +217,46 @@ const Vis: React.FunctionComponent<IState> = ({
     scale.x,
     scale.y,
     scale.z,
-    glasses
+    model
   ]);
 
   useLayoutEffect(() => {
     gizmo.current.setMode(gizmoState);
   }, [gizmoState]);
 
+  useLayoutEffect(() => {}, [currentImage.current]);
+
   return (
     <div style={{ width: "100%" }}>
-      <Mount
-        ref={mount}
-        // onClick={() => setAnimating(!isAnimating)}
-      />
+      <Mount ref={mount} />
     </div>
   );
 };
 
-//helpers
+//helpers & styles
+
+const mapModelToState = (
+  model: THREE.Object3D,
+  setState: Dispatch<SetStateAction<IThreeDPosition>>
+) => () => {
+  setState({
+    position: {
+      x: model.position.x,
+      y: model.position.y,
+      z: model.position.z
+    },
+    rotation: {
+      x: radiansToDegrees(model.rotation.x),
+      y: radiansToDegrees(model.rotation.y),
+      z: radiansToDegrees(model.rotation.z)
+    },
+    scale: {
+      x: model.scale.x,
+      y: model.scale.y,
+      z: model.scale.z
+    }
+  });
+};
 
 const visibleHeightAtZDepth = (depth: any, camera: any) => {
   // compensate for cameras not positioned at z=0
@@ -319,8 +276,6 @@ const visibleWidthAtZDepth = (depth: any, camera: any) => {
   return height * camera.aspect;
 };
 
-export default Vis;
-
 const radiansToDegrees = (rads: ICoordinate): ICoordinate => {
   if (rads === "" || rads === "-") return rads;
   return (rads * 180) / Math.PI;
@@ -339,3 +294,5 @@ const Mount = styled.div`
   align-items: center;
   justify-content: center;
 `;
+
+export default Vis;
