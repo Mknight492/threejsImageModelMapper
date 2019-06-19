@@ -40,8 +40,26 @@ const Vis: React.FunctionComponent<IState> = ({
 
   const mount = useRef<any>(null);
   const gizmo = useRef<any>(null); // reference to the transformcontrols/gizmo
-  const currentImage = useRef<any>(null);
+
   const currentModel = useRef<any>(null);
+  const renderer = useRef<THREE.WebGLRenderer>();
+
+  let fieldOfView = 100;
+  let initialAspectRatio = 1;
+  let nearPlane = 0.1;
+  let farPlane = 1000;
+  const imageZ = 0;
+  const camera = useRef<THREE.PerspectiveCamera>(
+    new THREE.PerspectiveCamera(
+      fieldOfView,
+      initialAspectRatio,
+      nearPlane,
+      farPlane
+    )
+  );
+  const currentImageMesh = useRef<any>(null);
+  const modelScene = useRef<THREE.Scene>(new THREE.Scene());
+  const imageScene = useRef<THREE.Scene>(new THREE.Scene());
 
   // this function is called once on component mounting and sets up the threejs canvas
   useLayoutEffect(() => {
@@ -54,26 +72,33 @@ const Vis: React.FunctionComponent<IState> = ({
     const imageZ = 0;
 
     //initialising two scenes so that model lights don't affect the image lighting
-    const modelScene = new THREE.Scene();
-    const imageScene = new THREE.Scene();
+    // const modelScene = new THREE.Scene();
+    // const imageScene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(
-      fieldOfView,
-      initialAspectRatio,
-      nearPlane,
-      farPlane
-    );
-    camera.position.z = 40;
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
+    // const camera = new THREE.PerspectiveCamera(
+    //   fieldOfView,
+    //   initialAspectRatio,
+    //   nearPlane,
+    //   farPlane
+    // );
+    camera.current.position.z = 40;
+    camera.current.lookAt(new THREE.Vector3(0, 0, 0));
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.autoClear = false;
-    renderer.setClearColor(0xffffff, 0);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    mount.current.appendChild(renderer.domElement);
+    let rendererInstance = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true
+    });
+    renderer.current = rendererInstance;
+    renderer.current.autoClear = false;
+    renderer.current.setClearColor(0xffffff, 0);
+    renderer.current.setPixelRatio(window.devicePixelRatio);
+    mount.current.appendChild(renderer.current.domElement);
 
     //Transform controls
-    const control = new TransformControls(camera, renderer.domElement);
+    const control = new TransformControls(
+      camera.current,
+      renderer.current.domElement
+    );
     control.addEventListener("change", renderScene);
     control.scope = "global";
     gizmo.current = control; //add reference to the controls so can be used out of
@@ -91,110 +116,60 @@ const Vis: React.FunctionComponent<IState> = ({
     const loader = new THREE.ObjectLoader();
     loader.load(json_path, addObject);
 
-    let mesh: any;
-    var imageLoader = new THREE.TextureLoader();
+    let imageMaterial: THREE.MeshLambertMaterial;
+    let imageGeometry: THREE.PlaneGeometry;
+    // let mesh: THREE.Mesh;
+    let imageLoader = new THREE.TextureLoader();
+    let currentImageEventListener: EventListener;
 
-    var imageMaterial = new THREE.MeshLambertMaterial({
-      map: imageLoader.load(alt, function(img) {
-        let imageRatio = img.image.naturalWidth / img.image.naturalHeight;
-        //event listeners need to be change to remove/add reference to the function
-        window.removeEventListener("resize", handleResize(imageRatio));
-        window.addEventListener("resize", handleResize(imageRatio));
-        handleResize(imageRatio)();
-      })
-    });
-    var imageGeometry = new THREE.PlaneGeometry(1, 1);
-
-    // combine our image geometry and material into a mesh
-    mesh = new THREE.Mesh(imageGeometry, imageMaterial);
-
-    // set the position of the image mesh in the x,y,z dimensions
-    mesh.position.set(0, 0, imageZ);
-    mesh.geometry = new THREE.PlaneGeometry(1, 1);
-    // add the image to the scene
-    imageScene.add(mesh); //need to overcome
+    addImage(alt2);
 
     var amb = new THREE.AmbientLight(0xffffff, 1);
-    imageScene.add(amb);
+    imageScene.current.add(amb);
 
-    function renderScene() {
-      renderer.render(imageScene, camera);
-      renderer.render(modelScene, camera);
+    function addImage(imageUrl: string) {
+      //remove old image
+      if (currentImageMesh.current)
+        imageScene.current.remove(currentImageMesh.current);
+      if (imageGeometry) imageGeometry.dispose();
+      if (imageMaterial) imageMaterial.dispose();
+      if (currentImageEventListener)
+        window.removeEventListener("resize", currentImageEventListener);
+
+      //add new image
+      imageMaterial = new THREE.MeshLambertMaterial({
+        map: imageLoader.load(imageUrl, function(img) {
+          let imageRatio = img.image.naturalWidth / img.image.naturalHeight;
+          //event listeners need to be change to remove/add reference to the function
+          currentImageEventListener = handleResize(imageRatio);
+          window.addEventListener("resize", currentImageEventListener);
+          currentImageEventListener({} as Event);
+        })
+      });
+      imageGeometry = new THREE.PlaneGeometry(1, 1);
+
+      // combine our image geometry and material into a mesh
+      currentImageMesh.current = new THREE.Mesh(imageGeometry, imageMaterial);
+
+      // set the position of the image mesh in the x,y,z dimensions
+      currentImageMesh.current.position.set(0, 0, imageZ);
+      currentImageMesh.current.geometry = imageGeometry;
+      // add the image to the scene
+      imageScene.current.add(currentImageMesh.current); //need to overcome
     }
+
     function addObject(objectToAdd: THREE.Object3D) {
-      let scale = camera.position.z;
+      let scale = camera.current.position.z;
       objectToAdd.scale.set(scale, scale, scale);
       objectToAdd.position.z = 10;
       currentModel.current = objectToAdd;
       control.attach(objectToAdd);
-      modelScene.add(control);
-      modelScene!.add(objectToAdd);
+      modelScene.current.add(control);
+      modelScene!.current.add(objectToAdd);
       control.addEventListener(
         "change",
         mapModelToState(objectToAdd, setState)
       );
-    }
-
-    function handleResize(imageAspectRatio: any) {
-      return function() {
-        const { width, height } = determineWidthAndHeight(imageAspectRatio);
-
-        var maxSize = Math.max(width, height);
-        renderer.setSize(maxSize, maxSize);
-
-        let imgHeight: number;
-        let imgWidth: number;
-
-        //image is portrate
-        if (imageAspectRatio < 1) {
-          imgHeight = visibleHeightAtZDepth(0, camera); // visible height
-          imgWidth = imgHeight * imageAspectRatio; //imageAspectRatio; // visible
-          setStateImageOffset(0);
-        } //image is landscape
-        else {
-          imgWidth = visibleHeightAtZDepth(0, camera); // visible height
-          imgHeight = imgWidth / imageAspectRatio; // visible wid
-
-          setStateImageOffset((height - width) / 2);
-          // mesh.position.y = (imgWidth - imgHeight) / 2;
-        }
-        mesh.geometry = mesh.geometry = new THREE.PlaneGeometry(
-          imgWidth,
-          imgHeight
-        );
-        camera.updateProjectionMatrix();
-        renderScene();
-      };
-    }
-
-    function determineWidthAndHeight(
-      imageAspectRatio: any
-    ): {
-      width: number;
-      height: number;
-    } {
-      var viewportHeight = Math.max(
-        document.documentElement.clientHeight,
-        window.innerHeight || 0
-      );
-      var maxHeight = viewportHeight - 40; //this is the height of the title
-      let maxWidth = mount.current.getBoundingClientRect().width;
-
-      let sizeByWidth = {
-        width: maxWidth,
-        height: maxWidth / imageAspectRatio
-      };
-      let sizeByHeight = {
-        width: maxHeight * imageAspectRatio,
-        height: maxHeight
-      };
-
-      if (
-        sizeByWidth.width < sizeByHeight.width &&
-        sizeByWidth.height < maxHeight
-      ) {
-        return sizeByWidth;
-      } else return sizeByHeight;
     }
 
     const animate = () => {
@@ -218,14 +193,16 @@ const Vis: React.FunctionComponent<IState> = ({
     return () => {
       stop();
       window.removeEventListener("resize", handleResize);
-      mount.current.removeChild(renderer.domElement);
-      modelScene.remove(currentModel.current);
-      modelScene.remove(mesh);
+      if (renderer.current)
+        mount.current.removeChild(renderer.current.domElement);
+      modelScene.current.remove(currentModel.current);
+
       imageGeometry.dispose();
       imageMaterial.dispose();
     };
   }, ["USE_ONCE"]);
 
+  //method for updating model position if its edited in the form
   useLayoutEffect(() => {
     if (currentModel && currentModel.current && position) {
       currentModel.current.position.x = position.x || 0;
@@ -251,9 +228,73 @@ const Vis: React.FunctionComponent<IState> = ({
     currentModel.current
   ]);
 
+  //method for upading gizmo when the mode button is clicked
   useLayoutEffect(() => {
     gizmo.current.setMode(gizmoState);
   }, [gizmoState]);
+
+  function renderScene() {
+    if (renderer.current && camera.current) {
+      renderer.current.render(imageScene.current, camera.current);
+      renderer.current.render(modelScene.current, camera.current);
+    }
+  }
+
+  function handleResize(imageAspectRatio: any) {
+    return function() {
+      const { width, height } = determineWidthAndHeight(imageAspectRatio);
+
+      var maxSize = Math.max(width, height);
+      if (renderer.current) renderer.current.setSize(maxSize, maxSize);
+
+      let imgHeight: number;
+      let imgWidth: number;
+
+      //image is portrate
+      if (imageAspectRatio < 1) {
+        imgHeight = visibleHeightAtZDepth(0, camera.current); // visible height
+        imgWidth = imgHeight * imageAspectRatio;
+        setStateImageOffset(0);
+      } //image is landscape
+      else {
+        imgWidth = visibleHeightAtZDepth(0, camera.current); // visible height
+        imgHeight = imgWidth / imageAspectRatio;
+
+        setStateImageOffset((height - width) / 2);
+      }
+      currentImageMesh.current.geometry = new THREE.PlaneGeometry(
+        imgWidth,
+        imgHeight
+      );
+      camera.current.updateProjectionMatrix();
+      renderScene();
+    };
+  }
+
+  function determineWidthAndHeight(imageAspectRatio: any) {
+    var viewportHeight = Math.max(
+      document.documentElement.clientHeight,
+      window.innerHeight || 0
+    );
+    var maxHeight = viewportHeight - 40; //this is the height of the title
+    let maxWidth = mount.current.getBoundingClientRect().width;
+
+    let sizeByWidth = {
+      width: maxWidth,
+      height: maxWidth / imageAspectRatio
+    };
+    let sizeByHeight = {
+      width: maxHeight * imageAspectRatio,
+      height: maxHeight
+    };
+
+    if (
+      sizeByWidth.width < sizeByHeight.width &&
+      sizeByWidth.height < maxHeight
+    ) {
+      return sizeByWidth;
+    } else return sizeByHeight;
+  }
 
   return (
     <div style={{ width: "100%" }}>
