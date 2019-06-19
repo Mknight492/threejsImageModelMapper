@@ -130,35 +130,42 @@ const ImageToModalMapper = () => {
               value={state.scale.z}
               type="number"
             />
-            <button
+            <StyledButton
               onClick={() => {
                 setStateGizmoState("translate");
               }}
             >
               translate
-            </button>
-            <button
+            </StyledButton>
+            <StyledButton
               onClick={() => {
                 setStateGizmoState("rotate");
               }}
             >
               rotate
-            </button>
-            <button
+            </StyledButton>
+            <StyledButton
               onClick={() => {
                 setStateGizmoState("scale");
               }}
             >
               scale
-            </button>
-            <button
+            </StyledButton>
+            <StyledButton
               onClick={() => {
                 setState(initialState);
               }}
             >
               {" "}
               reset{" "}
-            </button>
+            </StyledButton>
+            <StyledButton
+              onClick={() => {
+                setState(initialState);
+              }}
+            >
+              done
+            </StyledButton>
           </Positions>
         </Row>
       </Box>
@@ -194,6 +201,10 @@ const Row = styled.div`
 const Positions = styled.div`
   display: flex;
   flex-direction: column;
+`;
+
+const StyledButton = styled.button`
+  margin-top: 15px;
 `;
 
 export interface IThreeDPosition {
