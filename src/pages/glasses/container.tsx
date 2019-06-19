@@ -208,6 +208,8 @@ export interface ICoordinates {
   z: number | "" | "-";
 }
 
+export type ICoordinate = number | "" | "-";
+
 export type ITransformControlsType = "translate" | "rotate" | "scale";
 
 export default ImageToModalMapper;

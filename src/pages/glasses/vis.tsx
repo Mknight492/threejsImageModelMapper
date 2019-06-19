@@ -12,10 +12,16 @@ import * as THREE from "three";
 import { SizeMe } from "react-sizeme";
 
 //models
-import { IThreeDPosition, ITransformControlsType } from "./container";
+import {
+  IThreeDPosition,
+  ITransformControlsType,
+  ICoordinate
+} from "./container";
+
+import styled from "styled-components";
 
 var TransformControls = require("three-transform-controls")(THREE);
-const OrbitControls = require("three-orbitcontrols");
+// const OrbitControls = require("three-orbitcontrols");
 
 interface IState {
   ThreeDPosition: IThreeDPosition;
@@ -30,20 +36,31 @@ const Vis: React.FunctionComponent<IState> = ({
 }) => {
   const { position, rotation, scale } = ThreeDPosition;
 
+  const [glasses, setGlasses] = useState<any>();
+  const [imageAspectRatio, setStateAspectRatio] = useState<number>(0);
+
   const mount = useRef<any>(null);
-  const [isAnimating, setAnimating] = useState(true);
+
   const controls = useRef<any>(null);
 
-  const imageAspectRatio = 3 / 4;
-
-  const [glasses, setGlasses] = useState<any>();
   const gizmo = useRef<any>(null);
-  //   let glasses: THREE.Object3D;
 
   // this function is called once on component mounting and sets up the threejs canvas
   useLayoutEffect(() => {
     let width = mount.current.getBoundingClientRect().width;
     let height = width * imageAspectRatio;
+    var w = Math.max(
+      document.documentElement.clientWidth,
+      window.innerWidth || 0
+    );
+    var h =
+      Math.max(document.documentElement.clientHeight, window.innerHeight || 0) -
+      40; //this is the height of the title
+
+    const reduceScale = height > h ? height / h : 1;
+    width = width / reduceScale;
+    height = height / reduceScale;
+
     let frameId: any;
 
     let fieldOfView = 100;
@@ -70,6 +87,7 @@ const Vis: React.FunctionComponent<IState> = ({
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.autoClear = false;
     renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
     mount.current.appendChild(renderer.domElement);
     window.addEventListener("resize", handleResize);
 
@@ -82,6 +100,7 @@ const Vis: React.FunctionComponent<IState> = ({
     const control = new TransformControls(camera, renderer.domElement);
     control.addEventListener("change", renderScene);
     gizmo.current = control;
+    control.scope = "local";
 
     // control.addEventListener("dragging-changed", function(event: any) {
     //   orbit.enabled = !event.value;
@@ -95,9 +114,9 @@ const Vis: React.FunctionComponent<IState> = ({
           z: glasses.position.z
         },
         rotation: {
-          x: glasses.rotation.x,
-          y: glasses.rotation.y,
-          z: glasses.rotation.z
+          x: radiansToDegrees(glasses.rotation.x),
+          y: radiansToDegrees(glasses.rotation.y),
+          z: radiansToDegrees(glasses.rotation.z)
         },
         scale: {
           x: glasses.scale.x,
@@ -109,7 +128,7 @@ const Vis: React.FunctionComponent<IState> = ({
 
     const addObject = async (objectToAdd: THREE.Object3D) => {
       let scale = 40;
-      objectToAdd.scale.set(scale * imageAspectRatio, scale, scale);
+      objectToAdd.scale.set(scale, scale, scale);
 
       await setGlasses(objectToAdd);
       control.attach(objectToAdd);
@@ -131,6 +150,19 @@ const Vis: React.FunctionComponent<IState> = ({
 
     //image loader
     var imageLoader = new THREE.TextureLoader();
+    var imageLaded = imageLoader.load(
+      "https://s3.amazonaws.com/duhaime/blog/tsne-webgl/assets/cat.jpg",
+      function(img) {
+        console.log(img.image.naturalHeight / img.image.naturalWidth);
+        setStateAspectRatio(img.image.naturalHeight / img.image.naturalWidth);
+        camera.aspect = img.image.naturalHeight / img.image.naturalWidth;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+        //need to see the aspect ratio here.
+        // therefore can be dynamic
+      }
+    );
+
     var imageMaterial = new THREE.MeshLambertMaterial({
       map: imageLoader.load(
         "https://s3.amazonaws.com/duhaime/blog/tsne-webgl/assets/cat.jpg"
@@ -140,8 +172,8 @@ const Vis: React.FunctionComponent<IState> = ({
       map: imageLoader.load("")
     });
     // deterime what is visable fgrom the camera and make the image equal to that size
-
-    console.log(imgWidth); //
+    // console.log(imageLaded);
+    // console.log(imgWidth); //
     var imageGeometry = new THREE.PlaneGeometry(imgWidth, imgHeight);
 
     // combine our image geometry and material into a mesh
@@ -167,6 +199,21 @@ const Vis: React.FunctionComponent<IState> = ({
     function handleResize() {
       width = mount.current.getBoundingClientRect().width;
       height = width * imageAspectRatio;
+
+      var w = Math.max(
+        document.documentElement.clientWidth,
+        window.innerWidth || 0
+      );
+      var h =
+        Math.max(
+          document.documentElement.clientHeight,
+          window.innerHeight || 0
+        ) - 40; //this is the height of the title
+
+      const reduceScale = height > h ? height / h : 1;
+      width = width / reduceScale;
+      height = height / reduceScale;
+
       renderer.setSize(width, height);
       camera.updateProjectionMatrix();
       renderScene();
@@ -218,12 +265,12 @@ const Vis: React.FunctionComponent<IState> = ({
       glasses.position.x = position.x || 0;
       glasses.position.y = position.y || 0;
       glasses.position.z = position.z || 0;
-      glasses.rotation.x = rotation.x || 0;
-      glasses.rotation.y = rotation.y || 0;
-      glasses.rotation.z = rotation.z || 0;
-      glasses.scale.x = scale.x || 0;
-      glasses.scale.y = scale.y || 0;
-      glasses.scale.z = scale.z || 0;
+      glasses.rotation.x = degreesToRadians(rotation.x) || 0;
+      glasses.rotation.y = degreesToRadians(rotation.y) || 0;
+      glasses.rotation.z = degreesToRadians(rotation.z) || 0;
+      glasses.scale.x = scale.x || 40;
+      glasses.scale.y = scale.y || 40;
+      glasses.scale.z = scale.z || 40;
     }
   }, [
     position.x,
@@ -244,9 +291,7 @@ const Vis: React.FunctionComponent<IState> = ({
 
   return (
     <div style={{ width: "100%" }}>
-      <div
-        className="vis"
-        style={{ width: "90%", margin: "0 auto" }}
+      <Mount
         ref={mount}
         // onClick={() => setAnimating(!isAnimating)}
       />
@@ -275,3 +320,22 @@ const visibleWidthAtZDepth = (depth: any, camera: any) => {
 };
 
 export default Vis;
+
+const radiansToDegrees = (rads: ICoordinate): ICoordinate => {
+  if (rads === "" || rads === "-") return rads;
+  return (rads * 180) / Math.PI;
+};
+
+const degreesToRadians = (degs: ICoordinate): ICoordinate => {
+  if (degs === "" || degs === "-") return degs;
+  return (degs / 180) * Math.PI;
+};
+
+//styles
+
+const Mount = styled.div`
+  width: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
