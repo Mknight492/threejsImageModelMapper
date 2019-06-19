@@ -36,6 +36,8 @@ const Vis: React.FunctionComponent<IState> = ({
 }) => {
   const { position, rotation, scale } = ThreeDPosition;
 
+  const [imageOffset, setStateImageOffset] = useState<number>(0);
+
   const mount = useRef<any>(null);
   const gizmo = useRef<any>(null); // reference to the transformcontrols/gizmo
   const currentImage = useRef<any>(null);
@@ -93,7 +95,7 @@ const Vis: React.FunctionComponent<IState> = ({
     var imageLoader = new THREE.TextureLoader();
 
     var imageMaterial = new THREE.MeshLambertMaterial({
-      map: imageLoader.load(alt2, function(img) {
+      map: imageLoader.load(alt, function(img) {
         let imageRatio = img.image.naturalWidth / img.image.naturalHeight;
         //event listeners need to be change to remove/add reference to the function
         window.removeEventListener("resize", handleResize(imageRatio));
@@ -122,6 +124,7 @@ const Vis: React.FunctionComponent<IState> = ({
     function addObject(objectToAdd: THREE.Object3D) {
       let scale = camera.position.z;
       objectToAdd.scale.set(scale, scale, scale);
+      objectToAdd.position.z = 10;
       currentModel.current = objectToAdd;
       control.attach(objectToAdd);
       modelScene.add(control);
@@ -146,11 +149,14 @@ const Vis: React.FunctionComponent<IState> = ({
         if (imageAspectRatio < 1) {
           imgHeight = visibleHeightAtZDepth(0, camera); // visible height
           imgWidth = imgHeight * imageAspectRatio; //imageAspectRatio; // visible
+          setStateImageOffset(0);
         } //image is landscape
         else {
           imgWidth = visibleHeightAtZDepth(0, camera); // visible height
           imgHeight = imgWidth / imageAspectRatio; // visible wid
-          mesh.position.y = (imgWidth - imgHeight) / 2;
+
+          setStateImageOffset((height - width) / 2);
+          // mesh.position.y = (imgWidth - imgHeight) / 2;
         }
         mesh.geometry = mesh.geometry = new THREE.PlaneGeometry(
           imgWidth,
@@ -251,7 +257,7 @@ const Vis: React.FunctionComponent<IState> = ({
 
   return (
     <div style={{ width: "100%" }}>
-      <Mount ref={mount} />
+      <Mount ref={mount} shift={imageOffset} />
     </div>
   );
 };
@@ -311,11 +317,19 @@ const degreesToRadians = (degs: ICoordinate): ICoordinate => {
 
 //styles
 
-const Mount = styled.div`
-  width: 90%;
+interface scalabe {
+  shift: number;
+  ref: React.MutableRefObject<any>;
+}
+
+const Mount = styled.div<scalabe>`
+  width: 95%;
   display: flex;
   align-items: center;
   justify-content: center;
-`;
+  * {
+    margin-top: ${p => p.shift}px;
+  }
+` as React.FunctionComponent<scalabe>;
 
 export default Vis;
