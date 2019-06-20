@@ -21,7 +21,7 @@ import {
 import styled from "styled-components";
 
 //the transfor controls aren't exported from "three" so have to be imported like so
-var TransformControls = require("three-transform-controls")(THREE);
+var TransformControls = require("three-transform-ctrls");
 
 interface IState {
   ThreeDPosition: IThreeDPosition;
@@ -103,7 +103,7 @@ const Vis: React.FunctionComponent<IState> = ({
       renderer.current.domElement
     );
     control.addEventListener("change", renderScene);
-    control.scope = "local";
+    control.scope = "global";
     gizmo.current = control; //add reference to the controls so can be used out of
 
     var amb = new THREE.AmbientLight(0xffffff, 1);
@@ -369,6 +369,7 @@ const Mount = styled.div<scalabe>`
   justify-content: center;
   * {
     margin-top: ${p => p.shift}px;
+    margin-bottom: ${p => p.shift}px;
   }
 ` as React.FunctionComponent<scalabe>;
 

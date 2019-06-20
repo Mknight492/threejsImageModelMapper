@@ -21,9 +21,7 @@
     "react-scripts": "^3.0.1",
     "react-sizeme": "^2.6.7",
     "three": "^0.105.2",
-    "three-orbitcontrols": "^2.102.1",
-    "three-transform-controls": "^1.0.4",
-    "threejs-transformcontrols": "^0.83.0",
+    "three-transform-ctrls": "^1.0.1",
     "typescript": "3.4.3"
   },
   "scripts": {
