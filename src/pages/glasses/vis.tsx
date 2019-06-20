@@ -27,12 +27,16 @@ interface IState {
   ThreeDPosition: IThreeDPosition;
   setState: Dispatch<SetStateAction<IThreeDPosition>>;
   gizmoState: ITransformControlsType;
+  imageUrl: string;
+  modelUrl: string;
 }
 
 const Vis: React.FunctionComponent<IState> = ({
   ThreeDPosition,
   setState,
-  gizmoState
+  gizmoState,
+  imageUrl,
+  modelUrl
 }) => {
   const { position, rotation, scale } = ThreeDPosition;
 
@@ -49,6 +53,7 @@ const Vis: React.FunctionComponent<IState> = ({
   let nearPlane = 0.1;
   let farPlane = 1000;
   const imageZ = 0;
+
   const camera = useRef<THREE.PerspectiveCamera>(
     new THREE.PerspectiveCamera(
       fieldOfView,
@@ -57,30 +62,22 @@ const Vis: React.FunctionComponent<IState> = ({
       farPlane
     )
   );
-  const currentImageMesh = useRef<any>(null);
+
   const modelScene = useRef<THREE.Scene>(new THREE.Scene());
   const imageScene = useRef<THREE.Scene>(new THREE.Scene());
+
+  const image = useRef({
+    loader: new THREE.TextureLoader(),
+    imageMaterial: new THREE.MeshLambertMaterial(),
+    imageGeometry: new THREE.PlaneGeometry(),
+    mesh: new THREE.Mesh(),
+    currentImageEventListener: (event: Event) => {}
+  });
 
   // this function is called once on component mounting and sets up the threejs canvas
   useLayoutEffect(() => {
     let frameId: any;
 
-    let fieldOfView = 100;
-    let initialAspectRatio = 1;
-    let nearPlane = 0.1;
-    let farPlane = 1000;
-    const imageZ = 0;
-
-    //initialising two scenes so that model lights don't affect the image lighting
-    // const modelScene = new THREE.Scene();
-    // const imageScene = new THREE.Scene();
-
-    // const camera = new THREE.PerspectiveCamera(
-    //   fieldOfView,
-    //   initialAspectRatio,
-    //   nearPlane,
-    //   farPlane
-    // );
     camera.current.position.z = 40;
     camera.current.lookAt(new THREE.Vector3(0, 0, 0));
 
@@ -116,47 +113,10 @@ const Vis: React.FunctionComponent<IState> = ({
     const loader = new THREE.ObjectLoader();
     loader.load(json_path, addObject);
 
-    let imageMaterial: THREE.MeshLambertMaterial;
-    let imageGeometry: THREE.PlaneGeometry;
-    // let mesh: THREE.Mesh;
-    let imageLoader = new THREE.TextureLoader();
-    let currentImageEventListener: EventListener;
-
     addImage(alt2);
 
     var amb = new THREE.AmbientLight(0xffffff, 1);
     imageScene.current.add(amb);
-
-    function addImage(imageUrl: string) {
-      //remove old image
-      if (currentImageMesh.current)
-        imageScene.current.remove(currentImageMesh.current);
-      if (imageGeometry) imageGeometry.dispose();
-      if (imageMaterial) imageMaterial.dispose();
-      if (currentImageEventListener)
-        window.removeEventListener("resize", currentImageEventListener);
-
-      //add new image
-      imageMaterial = new THREE.MeshLambertMaterial({
-        map: imageLoader.load(imageUrl, function(img) {
-          let imageRatio = img.image.naturalWidth / img.image.naturalHeight;
-          //event listeners need to be change to remove/add reference to the function
-          currentImageEventListener = handleResize(imageRatio);
-          window.addEventListener("resize", currentImageEventListener);
-          currentImageEventListener({} as Event);
-        })
-      });
-      imageGeometry = new THREE.PlaneGeometry(1, 1);
-
-      // combine our image geometry and material into a mesh
-      currentImageMesh.current = new THREE.Mesh(imageGeometry, imageMaterial);
-
-      // set the position of the image mesh in the x,y,z dimensions
-      currentImageMesh.current.position.set(0, 0, imageZ);
-      currentImageMesh.current.geometry = imageGeometry;
-      // add the image to the scene
-      imageScene.current.add(currentImageMesh.current); //need to overcome
-    }
 
     function addObject(objectToAdd: THREE.Object3D) {
       let scale = camera.current.position.z;
@@ -196,9 +156,6 @@ const Vis: React.FunctionComponent<IState> = ({
       if (renderer.current)
         mount.current.removeChild(renderer.current.domElement);
       modelScene.current.remove(currentModel.current);
-
-      imageGeometry.dispose();
-      imageMaterial.dispose();
     };
   }, ["USE_ONCE"]);
 
@@ -233,6 +190,51 @@ const Vis: React.FunctionComponent<IState> = ({
     gizmo.current.setMode(gizmoState);
   }, [gizmoState]);
 
+  //method for loading new image and model on props change
+  useLayoutEffect(() => {
+    addImage(imageUrl);
+  }, [imageUrl]);
+
+  function addImage(imageUrl: string) {
+    //remove old image
+    if (image.current.mesh) imageScene.current.remove(image.current.mesh);
+    if (image.current.imageGeometry) image.current.imageGeometry.dispose();
+    if (image.current.imageMaterial) image.current.imageMaterial.dispose();
+    if (image.current.currentImageEventListener)
+      window.removeEventListener(
+        "resize",
+        image.current.currentImageEventListener
+      );
+
+    const loaderInst = new THREE.TextureLoader();
+    //add new image
+    image.current.imageMaterial = new THREE.MeshLambertMaterial({
+      map: loaderInst.load(imageUrl, function(img) {
+        let imageRatio = img.image.naturalWidth / img.image.naturalHeight;
+        //event listeners need to be change to remove/add reference to the function
+        image.current.currentImageEventListener = handleResize(imageRatio);
+        window.addEventListener(
+          "resize",
+          image.current.currentImageEventListener
+        );
+        image.current.currentImageEventListener({} as Event);
+      })
+    });
+    image.current.imageGeometry = new THREE.PlaneGeometry(1, 1);
+
+    // combine our image geometry and material into a mesh
+    image.current.mesh = new THREE.Mesh(
+      image.current.imageGeometry,
+      image.current.imageMaterial
+    );
+
+    // set the position of the image mesh in the x,y,z dimensions
+    image.current.mesh.position.set(0, 0, imageZ);
+
+    // add the image to the scene
+    imageScene.current.add(image.current.mesh); //need to overcome
+  }
+
   function renderScene() {
     if (renderer.current && camera.current) {
       renderer.current.render(imageScene.current, camera.current);
@@ -252,17 +254,17 @@ const Vis: React.FunctionComponent<IState> = ({
 
       //image is portrate
       if (imageAspectRatio < 1) {
-        imgHeight = visibleHeightAtZDepth(0, camera.current); // visible height
+        imgHeight = maximumWidthOrHeightAtZDepth(0, camera.current); // visible height
         imgWidth = imgHeight * imageAspectRatio;
         setStateImageOffset(0);
       } //image is landscape
       else {
-        imgWidth = visibleHeightAtZDepth(0, camera.current); // visible height
+        imgWidth = maximumWidthOrHeightAtZDepth(0, camera.current); // visible height
         imgHeight = imgWidth / imageAspectRatio;
 
         setStateImageOffset((height - width) / 2);
       }
-      currentImageMesh.current.geometry = new THREE.PlaneGeometry(
+      image.current.mesh.geometry = new THREE.PlaneGeometry(
         imgWidth,
         imgHeight
       );
@@ -328,7 +330,7 @@ const mapModelToState = (
   });
 };
 
-const visibleHeightAtZDepth = (depth: any, camera: any) => {
+const maximumWidthOrHeightAtZDepth = (depth: any, camera: any) => {
   // compensate for cameras not positioned at z=0
   const cameraOffset = camera.position.z;
   if (depth < cameraOffset) depth -= cameraOffset;
@@ -339,11 +341,6 @@ const visibleHeightAtZDepth = (depth: any, camera: any) => {
 
   // Math.abs to ensure the result is always positive
   return 2 * Math.tan(vFOV / 2) * Math.abs(depth);
-};
-
-const visibleWidthAtZDepth = (depth: any, camera: any) => {
-  const height = visibleHeightAtZDepth(depth, camera);
-  return height * camera.aspect;
 };
 
 const radiansToDegrees = (rads: ICoordinate): ICoordinate => {

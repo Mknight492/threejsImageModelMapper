@@ -62,6 +62,12 @@ const ImageToModalMapper = () => {
             ThreeDPosition={{ ...state }}
             setState={setState}
             gizmoState={gizmoState}
+            imageUrl={
+              "https://images.pexels.com/photos/248797/pexels-photo-248797.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
+            }
+            modelUrl={
+              "https://s3-us-west-1.amazonaws.com/glassesobjects/glasses/object_json_files/3Dviewer.json"
+            }
           />
           <Positions>
             <h3> Position</h3>
