@@ -45,7 +45,6 @@ const Vis: React.FunctionComponent<IState> = ({
   const mount = useRef<any>(null);
   const gizmo = useRef<any>(null); // reference to the transformcontrols/gizmo
 
-  const currentModel = useRef<any>(null);
   const renderer = useRef<THREE.WebGLRenderer>();
 
   let fieldOfView = 100;
@@ -91,6 +90,7 @@ const Vis: React.FunctionComponent<IState> = ({
       antialias: true,
       alpha: true
     });
+
     renderer.current = rendererInstance;
     renderer.current.autoClear = false;
     renderer.current.setClearColor(0xffffff, 0);
@@ -129,10 +129,6 @@ const Vis: React.FunctionComponent<IState> = ({
 
     return () => {
       stop();
-      window.removeEventListener("resize", handleResize);
-      if (renderer.current)
-        mount.current.removeChild(renderer.current.domElement);
-      modelScene.current.remove(currentModel.current);
     };
   }, ["USE_ONCE"]);
 
