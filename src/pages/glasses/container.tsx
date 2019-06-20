@@ -25,7 +25,9 @@ const initialState = (): IThreeDPosition => ({
 });
 
 const ImageToModalMapper = () => {
-  const [state, setState] = useState(initialState());
+  const [model3DpositionState, setStateModel3Dposition] = useState(
+    initialState()
+  );
   const [gizmoState, setStateGizmoState] = useState<ITransformControlsType>(
     "translate"
   );
@@ -43,7 +45,7 @@ const ImageToModalMapper = () => {
   ) => (event: React.ChangeEvent<HTMLInputElement>) => {
     // state[field][position] = parseFloat(event.target.value)
     event.persist();
-    setState(state => {
+    setStateModel3Dposition(state => {
       //   debugger;
       const newState = { ...state };
       const { value } = event.target;
@@ -66,8 +68,8 @@ const ImageToModalMapper = () => {
         <Title>Image 1</Title>
         <Row>
           <Test
-            ThreeDPosition={{ ...state }}
-            setState={setState}
+            ThreeDPosition={{ ...model3DpositionState }}
+            setState={setStateModel3Dposition}
             gizmoState={gizmoState}
             imageUrl={currentImageUrl}
             modelUrl={
@@ -80,21 +82,21 @@ const ImageToModalMapper = () => {
             <input
               id="positionx"
               onChange={handleChange("position", "x")}
-              value={state.position.x}
+              value={model3DpositionState.position.x}
               type="number"
             />
             <label htmlFor="positiony">y</label>
             <input
               id="positiony"
               onChange={handleChange("position", "y")}
-              value={state.position.y}
+              value={model3DpositionState.position.y}
               type="number"
             />
             <label htmlFor="positionz">z</label>
             <input
               id="positionz"
               onChange={handleChange("position", "z")}
-              value={state.position.z}
+              value={model3DpositionState.position.z}
               type="number"
             />
             <h3> Rotation</h3>
@@ -102,21 +104,21 @@ const ImageToModalMapper = () => {
             <input
               id="rotationx"
               onChange={handleChange("rotation", "x")}
-              value={state.rotation.x}
+              value={model3DpositionState.rotation.x}
               type="number"
             />
             <label htmlFor="rotationy">y</label>
             <input
               id="rotationy"
               onChange={handleChange("rotation", "y")}
-              value={state.rotation.y}
+              value={model3DpositionState.rotation.y}
               type="number"
             />
             <label htmlFor="rotationz">z</label>
             <input
               id="rotationz"
               onChange={handleChange("rotation", "z")}
-              value={state.rotation.z}
+              value={model3DpositionState.rotation.z}
               type="number"
             />
             <h3> Scale</h3>
@@ -124,21 +126,21 @@ const ImageToModalMapper = () => {
             <input
               id="scalex"
               onChange={handleChange("scale", "x")}
-              value={state.scale.x}
+              value={model3DpositionState.scale.x}
               type="number"
             />
             <label htmlFor="scaley">y</label>
             <input
               id="scaley"
               onChange={handleChange("scale", "y")}
-              value={state.scale.y}
+              value={model3DpositionState.scale.y}
               type="number"
             />
             <label htmlFor="scalez">z</label>
             <input
               id="scalez"
               onChange={handleChange("scale", "z")}
-              value={state.scale.z}
+              value={model3DpositionState.scale.z}
               type="number"
             />
             <StyledButton
@@ -164,16 +166,15 @@ const ImageToModalMapper = () => {
             </StyledButton>
             <StyledButton
               onClick={() => {
-                setState(initialState);
+                setStateModel3Dposition(initialState);
               }}
             >
-              {" "}
-              reset{" "}
+              reset
             </StyledButton>
             <StyledButton
               onClick={() => {
                 setStateImageUrl(state => (state === alt ? alt2 : alt));
-                setState(initialState());
+                setStateModel3Dposition(initialState());
               }}
             >
               done

@@ -103,7 +103,7 @@ const Vis: React.FunctionComponent<IState> = ({
       renderer.current.domElement
     );
     control.addEventListener("change", renderScene);
-    control.scope = "global";
+    control.scope = "local";
     gizmo.current = control; //add reference to the controls so can be used out of
 
     var amb = new THREE.AmbientLight(0xffffff, 1);
@@ -143,11 +143,11 @@ const Vis: React.FunctionComponent<IState> = ({
       model.current.modelinstance.position.y = formatCoordinate(position.y);
       model.current.modelinstance.position.z = formatCoordinate(position.z);
       model.current.modelinstance.rotation.x =
-        degreesToRadians(rotation.x) || 0;
+        (degreesToRadians(rotation.x) as number) || 0;
       model.current.modelinstance.rotation.y =
-        degreesToRadians(rotation.y) || 0;
+        (degreesToRadians(rotation.y) as number) || 0;
       model.current.modelinstance.rotation.z =
-        degreesToRadians(rotation.z) || 0;
+        (degreesToRadians(rotation.z) as number) || 0;
       model.current.modelinstance.scale.x = formatCoordinate(scale.x);
       model.current.modelinstance.scale.y = formatCoordinate(scale.y);
       model.current.modelinstance.scale.z = formatCoordinate(scale.z);
@@ -256,15 +256,15 @@ const Vis: React.FunctionComponent<IState> = ({
 
       //image is portrate
       if (imageAspectRatio < 1) {
-        imgHeight = maximumWidthOrHeightAtZDepth(0, camera.current); // visible height
+        imgHeight = maximumWidthOrHeightAtZDepth(0, camera.current);
         imgWidth = imgHeight * imageAspectRatio;
         setStateImageOffset(0);
       } //image is landscape
       else {
-        imgWidth = maximumWidthOrHeightAtZDepth(0, camera.current); // visible height
+        imgWidth = maximumWidthOrHeightAtZDepth(0, camera.current);
         imgHeight = imgWidth / imageAspectRatio;
 
-        setStateImageOffset((height - width) / 2);
+        setStateImageOffset((height - width) / 2); // means image will always be in the top left
       }
       image.current.mesh.geometry = new THREE.PlaneGeometry(
         imgWidth,
@@ -349,13 +349,13 @@ function formatCoordinate(coordinate: ICoordinate): number {
   return coordinate === "-" || coordinate === "" ? 0 : coordinate;
 }
 
-const radiansToDegrees = (rads: ICoordinate): number => {
-  if (rads === "" || rads === "-") return 0;
+const radiansToDegrees = (rads: ICoordinate): ICoordinate => {
+  if (rads === "" || rads === "-") return rads;
   return (rads * 180) / Math.PI;
 };
 
-const degreesToRadians = (degs: ICoordinate): number => {
-  if (degs === "" || degs === "-") return 0;
+const degreesToRadians = (degs: ICoordinate): ICoordinate => {
+  if (degs === "" || degs === "-") return degs;
   return (degs / 180) * Math.PI;
 };
 
