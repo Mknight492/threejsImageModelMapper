@@ -181,7 +181,6 @@ const ImageToModalMapper = () => {
             </StyledButton>
           </Positions>
         </Row>
-        <Row>ladding</Row>
       </Box>
     </Wrapper>
   );
