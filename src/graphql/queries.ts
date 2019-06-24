@@ -1,42 +1,61 @@
 // tslint:disable
 // this is an auto generated file. This will be overwritten
 
-export const getEvent = `query GetEvent($id: ID!) {
-  getEvent(id: $id) {
+export const getImage = `query GetImage($id: ID!) {
+  getImage(id: $id) {
     id
-    name
-    where
-    when
-    description
-    comments {
-      items {
-        eventId
-        commentId
-        content
-        createdAt
-      }
-      nextToken
-    }
+    url
+    translateX
+    translateY
+    translateZ
+    rotateX
+    rotateY
+    rotateZ
+    scaleX
+    scaleY
+    scaleZ
+    finished
   }
 }
 `;
-export const listEvents = `query ListEvents(
-  $filter: TableEventFilterInput
+export const listImages = `query ListImages(
+  $filter: TableImageFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  listEvents(filter: $filter, limit: $limit, nextToken: $nextToken) {
+  listImages(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       id
-      name
-      where
-      when
-      description
-      comments {
-        nextToken
-      }
+      url
+      translateX
+      translateY
+      translateZ
+      rotateX
+      rotateY
+      rotateZ
+      scaleX
+      scaleY
+      scaleZ
+      finished
     }
     nextToken
+  }
+}
+`;
+export const listUnfinishedImages = `query ListUnfinishedImages {
+  listUnfinishedImages {
+    id
+    url
+    translateX
+    translateY
+    translateZ
+    rotateX
+    rotateY
+    rotateZ
+    scaleX
+    scaleY
+    scaleZ
+    finished
   }
 }
 `;

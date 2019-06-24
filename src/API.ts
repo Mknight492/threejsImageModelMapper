@@ -1,12 +1,50 @@
 /* tslint:disable */
 //  This file was automatically generated and should not be edited.
 
-export type TableEventFilterInput = {
+export type CreateImageInput = {
+  url?: string | null,
+  translateX?: number | null,
+  translateY?: number | null,
+  translateZ?: number | null,
+  rotateX?: number | null,
+  rotateY?: number | null,
+  rotateZ?: number | null,
+  scaleX?: number | null,
+  scaleY?: number | null,
+  scaleZ?: number | null,
+  finished?: string | null,
+};
+
+export type UpdateImageInput = {
+  translateX?: number | null,
+  translateY?: number | null,
+  translateZ?: number | null,
+  rotateX?: number | null,
+  rotateY?: number | null,
+  rotateZ?: number | null,
+  scaleX?: number | null,
+  scaleY?: number | null,
+  scaleZ?: number | null,
+  finished?: string | null,
+};
+
+export type DeleteImageInput = {
+  id: string,
+};
+
+export type TableImageFilterInput = {
   id?: TableIDFilterInput | null,
-  name?: TableStringFilterInput | null,
-  where?: TableStringFilterInput | null,
-  when?: TableStringFilterInput | null,
-  description?: TableStringFilterInput | null,
+  url?: TableStringFilterInput | null,
+  translateX?: TableFloatFilterInput | null,
+  translateY?: TableFloatFilterInput | null,
+  translateZ?: TableFloatFilterInput | null,
+  rotateX?: TableFloatFilterInput | null,
+  rotateY?: TableFloatFilterInput | null,
+  rotateZ?: TableFloatFilterInput | null,
+  scaleX?: TableFloatFilterInput | null,
+  scaleY?: TableFloatFilterInput | null,
+  scaleZ?: TableFloatFilterInput | null,
+  finished?: TableBooleanFilterInput | null,
 };
 
 export type TableIDFilterInput = {
@@ -35,167 +73,231 @@ export type TableStringFilterInput = {
   beginsWith?: string | null,
 };
 
-export type CreateEventMutationVariables = {
-  name: string,
-  when: string,
-  where: string,
-  description: string,
+export type TableFloatFilterInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  contains?: number | null,
+  notContains?: number | null,
+  between?: Array< number | null > | null,
 };
 
-export type CreateEventMutation = {
-  // Create a single event.
-  createEvent:  {
-    __typename: "Event",
-    id: string,
-    name: string | null,
-    where: string | null,
-    when: string | null,
-    description: string | null,
-    // Paginate through all comments belonging to an individual post.
-    comments:  {
-      __typename: "CommentConnection",
-      items:  Array< {
-        __typename: "Comment",
-        // The id of the comment's parent event.
-        eventId: string,
-        // A unique identifier for the comment.
-        commentId: string,
-        // The comment's content.
-        content: string,
-        // The comment timestamp. This field is indexed to enable sorted pagination.
-        createdAt: string,
-      } | null > | null,
-      nextToken: string | null,
-    } | null,
+export type TableBooleanFilterInput = {
+  ne?: boolean | null,
+  eq?: boolean | null,
+};
+
+export type CreateImageMutationVariables = {
+  input: CreateImageInput,
+};
+
+export type CreateImageMutation = {
+  createImage:  {
+    __typename: "Image",
+    id: string | null,
+    url: string | null,
+    translateX: number | null,
+    translateY: number | null,
+    translateZ: number | null,
+    rotateX: number | null,
+    rotateY: number | null,
+    rotateZ: number | null,
+    scaleX: number | null,
+    scaleY: number | null,
+    scaleZ: number | null,
+    finished: boolean | null,
   } | null,
 };
 
-export type DeleteEventMutationVariables = {
+export type UpdateImageMutationVariables = {
+  input: UpdateImageInput,
+};
+
+export type UpdateImageMutation = {
+  updateImage:  {
+    __typename: "Image",
+    id: string | null,
+    url: string | null,
+    translateX: number | null,
+    translateY: number | null,
+    translateZ: number | null,
+    rotateX: number | null,
+    rotateY: number | null,
+    rotateZ: number | null,
+    scaleX: number | null,
+    scaleY: number | null,
+    scaleZ: number | null,
+    finished: boolean | null,
+  } | null,
+};
+
+export type DeleteImageMutationVariables = {
+  input: DeleteImageInput,
+};
+
+export type DeleteImageMutation = {
+  deleteImage:  {
+    __typename: "Image",
+    id: string | null,
+    url: string | null,
+    translateX: number | null,
+    translateY: number | null,
+    translateZ: number | null,
+    rotateX: number | null,
+    rotateY: number | null,
+    rotateZ: number | null,
+    scaleX: number | null,
+    scaleY: number | null,
+    scaleZ: number | null,
+    finished: boolean | null,
+  } | null,
+};
+
+export type GetImageQueryVariables = {
   id: string,
 };
 
-export type DeleteEventMutation = {
-  // Delete a single event by id.
-  deleteEvent:  {
-    __typename: "Event",
-    id: string,
-    name: string | null,
-    where: string | null,
-    when: string | null,
-    description: string | null,
-    // Paginate through all comments belonging to an individual post.
-    comments:  {
-      __typename: "CommentConnection",
-      items:  Array< {
-        __typename: "Comment",
-        // The id of the comment's parent event.
-        eventId: string,
-        // A unique identifier for the comment.
-        commentId: string,
-        // The comment's content.
-        content: string,
-        // The comment timestamp. This field is indexed to enable sorted pagination.
-        createdAt: string,
-      } | null > | null,
-      nextToken: string | null,
-    } | null,
+export type GetImageQuery = {
+  getImage:  {
+    __typename: "Image",
+    id: string | null,
+    url: string | null,
+    translateX: number | null,
+    translateY: number | null,
+    translateZ: number | null,
+    rotateX: number | null,
+    rotateY: number | null,
+    rotateZ: number | null,
+    scaleX: number | null,
+    scaleY: number | null,
+    scaleZ: number | null,
+    finished: boolean | null,
   } | null,
 };
 
-export type CommentOnEventMutationVariables = {
-  eventId: string,
-  content: string,
-  createdAt: string,
-};
-
-export type CommentOnEventMutation = {
-  // Comment on an event.
-  commentOnEvent:  {
-    __typename: "Comment",
-    // The id of the comment's parent event.
-    eventId: string,
-    // A unique identifier for the comment.
-    commentId: string,
-    // The comment's content.
-    content: string,
-    // The comment timestamp. This field is indexed to enable sorted pagination.
-    createdAt: string,
-  } | null,
-};
-
-export type GetEventQueryVariables = {
-  id: string,
-};
-
-export type GetEventQuery = {
-  // Get a single event by id.
-  getEvent:  {
-    __typename: "Event",
-    id: string,
-    name: string | null,
-    where: string | null,
-    when: string | null,
-    description: string | null,
-    // Paginate through all comments belonging to an individual post.
-    comments:  {
-      __typename: "CommentConnection",
-      items:  Array< {
-        __typename: "Comment",
-        // The id of the comment's parent event.
-        eventId: string,
-        // A unique identifier for the comment.
-        commentId: string,
-        // The comment's content.
-        content: string,
-        // The comment timestamp. This field is indexed to enable sorted pagination.
-        createdAt: string,
-      } | null > | null,
-      nextToken: string | null,
-    } | null,
-  } | null,
-};
-
-export type ListEventsQueryVariables = {
-  filter?: TableEventFilterInput | null,
+export type ListImagesQueryVariables = {
+  filter?: TableImageFilterInput | null,
   limit?: number | null,
   nextToken?: string | null,
 };
 
-export type ListEventsQuery = {
-  // Paginate through events.
-  listEvents:  {
-    __typename: "EventConnection",
+export type ListImagesQuery = {
+  listImages:  {
+    __typename: "ImageConnection",
     items:  Array< {
-      __typename: "Event",
-      id: string,
-      name: string | null,
-      where: string | null,
-      when: string | null,
-      description: string | null,
-      // Paginate through all comments belonging to an individual post.
-      comments:  {
-        __typename: "CommentConnection",
-        nextToken: string | null,
-      } | null,
+      __typename: "Image",
+      id: string | null,
+      url: string | null,
+      translateX: number | null,
+      translateY: number | null,
+      translateZ: number | null,
+      rotateX: number | null,
+      rotateY: number | null,
+      rotateZ: number | null,
+      scaleX: number | null,
+      scaleY: number | null,
+      scaleZ: number | null,
+      finished: boolean | null,
     } | null > | null,
     nextToken: string | null,
   } | null,
 };
 
-export type SubscribeToEventCommentsSubscriptionVariables = {
-  eventId: string,
+export type ListUnfinishedImagesQuery = {
+  listUnfinishedImages:  Array< {
+    __typename: "Image",
+    id: string | null,
+    url: string | null,
+    translateX: number | null,
+    translateY: number | null,
+    translateZ: number | null,
+    rotateX: number | null,
+    rotateY: number | null,
+    rotateZ: number | null,
+    scaleX: number | null,
+    scaleY: number | null,
+    scaleZ: number | null,
+    finished: boolean | null,
+  } | null > | null,
 };
 
-export type SubscribeToEventCommentsSubscription = {
-  subscribeToEventComments:  {
-    __typename: "Comment",
-    // The id of the comment's parent event.
-    eventId: string,
-    // A unique identifier for the comment.
-    commentId: string,
-    // The comment's content.
-    content: string,
-    // The comment timestamp. This field is indexed to enable sorted pagination.
-    createdAt: string,
+export type OnCreateImageSubscriptionVariables = {
+  id?: string | null,
+  url?: string | null,
+  translateX?: number | null,
+  translateY?: number | null,
+  translateZ?: number | null,
+};
+
+export type OnCreateImageSubscription = {
+  onCreateImage:  {
+    __typename: "Image",
+    id: string | null,
+    url: string | null,
+    translateX: number | null,
+    translateY: number | null,
+    translateZ: number | null,
+    rotateX: number | null,
+    rotateY: number | null,
+    rotateZ: number | null,
+    scaleX: number | null,
+    scaleY: number | null,
+    scaleZ: number | null,
+    finished: boolean | null,
+  } | null,
+};
+
+export type OnUpdateImageSubscriptionVariables = {
+  id?: string | null,
+  url?: string | null,
+  translateX?: number | null,
+  translateY?: number | null,
+  translateZ?: number | null,
+};
+
+export type OnUpdateImageSubscription = {
+  onUpdateImage:  {
+    __typename: "Image",
+    id: string | null,
+    url: string | null,
+    translateX: number | null,
+    translateY: number | null,
+    translateZ: number | null,
+    rotateX: number | null,
+    rotateY: number | null,
+    rotateZ: number | null,
+    scaleX: number | null,
+    scaleY: number | null,
+    scaleZ: number | null,
+    finished: boolean | null,
+  } | null,
+};
+
+export type OnDeleteImageSubscriptionVariables = {
+  id?: string | null,
+  url?: string | null,
+  translateX?: number | null,
+  translateY?: number | null,
+  translateZ?: number | null,
+};
+
+export type OnDeleteImageSubscription = {
+  onDeleteImage:  {
+    __typename: "Image",
+    id: string | null,
+    url: string | null,
+    translateX: number | null,
+    translateY: number | null,
+    translateZ: number | null,
+    rotateX: number | null,
+    rotateY: number | null,
+    rotateZ: number | null,
+    scaleX: number | null,
+    scaleY: number | null,
+    scaleZ: number | null,
+    finished: boolean | null,
   } | null,
 };

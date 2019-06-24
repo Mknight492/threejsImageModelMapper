@@ -1,14 +1,14 @@
 {
     "dev": {
         "awscloudformation": {
-            "AuthRoleName": "threejslabel-dev-20190621125002-authRole",
-            "UnauthRoleArn": "arn:aws:iam::503083240712:role/threejslabel-dev-20190621125002-unauthRole",
-            "AuthRoleArn": "arn:aws:iam::503083240712:role/threejslabel-dev-20190621125002-authRole",
+            "AuthRoleName": "threejslabel-dev-20190624123738-authRole",
+            "UnauthRoleArn": "arn:aws:iam::503083240712:role/threejslabel-dev-20190624123738-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::503083240712:role/threejslabel-dev-20190624123738-authRole",
             "Region": "us-east-1",
-            "DeploymentBucketName": "threejslabel-dev-20190621125002-deployment",
-            "UnauthRoleName": "threejslabel-dev-20190621125002-unauthRole",
-            "StackName": "threejslabel-dev-20190621125002",
-            "StackId": "arn:aws:cloudformation:us-east-1:503083240712:stack/threejslabel-dev-20190621125002/82044ce0-93be-11e9-abd3-1235152b041e"
+            "DeploymentBucketName": "threejslabel-dev-20190624123738-deployment",
+            "UnauthRoleName": "threejslabel-dev-20190624123738-unauthRole",
+            "StackName": "threejslabel-dev-20190624123738",
+            "StackId": "arn:aws:cloudformation:us-east-1:503083240712:stack/threejslabel-dev-20190624123738/461036c0-9618-11e9-81f4-128fc503e968"
         }
     }
 }
