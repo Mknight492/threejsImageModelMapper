@@ -5,8 +5,7 @@ import { isSymbol } from "util";
 
 import { mount, shallow, ReactWrapper } from "enzyme";
 
-import Countries from "./components/countries/countries";
-import CustomProvider from "./apollo/configureProvider";
+import CustomProvider from "./graphql/configureProvider";
 import Button from "./components/buttons/button";
 
 let wrapper: ReactWrapper;
@@ -32,8 +31,4 @@ it("renders without crashing", () => {
     div
   );
   ReactDOM.unmountComponentAtNode(div);
-});
-
-it("contains an instance of the countries Page", () => {
-  expect(wrapper.find(Countries).length).toEqual(1);
 });

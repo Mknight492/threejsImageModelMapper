@@ -1,47 +1,32 @@
 import React, {
   useRef,
-  useEffect,
   useLayoutEffect,
-  useState,
   Dispatch,
   SetStateAction
 } from "react";
 import * as THREE from "three";
 
-//helpers
-import { SizeMe } from "react-sizeme";
-
 //models
 import {
-  IThreeDPosition,
   ITransformControlsType,
-  ICoordinate
+  ICoordinate,
+  IimageToBelabelled
 } from "./container";
 
 import styled from "styled-components";
-
-//the transfor controls aren't exported from "three" so have to be imported like so
-var TransformControls = require("three-transform-ctrls");
+const TransformControls = require("three-transform-ctrls");
 
 interface IState {
-  ThreeDPosition: IThreeDPosition;
-  setState: Dispatch<SetStateAction<IThreeDPosition>>;
+  imageToLabel: IimageToBelabelled;
+  setState: Dispatch<SetStateAction<IimageToBelabelled>>;
   gizmoState: ITransformControlsType;
-  imageUrl: string;
-  modelUrl: string;
 }
 
 const Vis: React.FunctionComponent<IState> = ({
-  ThreeDPosition,
+  imageToLabel,
   setState,
-  gizmoState,
-  imageUrl,
-  modelUrl
+  gizmoState
 }) => {
-  const { position, rotation, scale } = ThreeDPosition;
-
-  const [imageOffset, setStateImageOffset] = useState<number>(0);
-
   const mount = useRef<any>(null);
   const gizmo = useRef<any>(null); // reference to the transformcontrols/gizmo
 
@@ -52,6 +37,8 @@ const Vis: React.FunctionComponent<IState> = ({
   let nearPlane = 0.1;
   let farPlane = 1000;
   const imageZ = 0;
+
+  const useOnce = "UseOnce";
 
   const camera = useRef<THREE.PerspectiveCamera>(
     new THREE.PerspectiveCamera(
@@ -82,15 +69,12 @@ const Vis: React.FunctionComponent<IState> = ({
   // this function is called once on component mounting and sets up the threejs canvas
   useLayoutEffect(() => {
     let frameId: any;
-
     camera.current.position.z = 40;
     camera.current.lookAt(new THREE.Vector3(0, 0, 0));
-
     let rendererInstance = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true
     });
-
     renderer.current = rendererInstance;
     renderer.current.autoClear = false;
     renderer.current.setClearColor(0xffffff, 0);
@@ -122,6 +106,7 @@ const Vis: React.FunctionComponent<IState> = ({
 
     const stop = () => {
       cancelAnimationFrame(frameId);
+      console.log("stopping");
       frameId = null;
     };
 
@@ -130,35 +115,50 @@ const Vis: React.FunctionComponent<IState> = ({
     return () => {
       stop();
     };
-  }, ["USE_ONCE"]);
+  }, [useOnce]);
 
   //method for updating model position if its edited in the form
   useLayoutEffect(() => {
-    if (model && model.current && position) {
-      model.current.modelinstance.position.x = formatCoordinate(position.x);
-      model.current.modelinstance.position.y = formatCoordinate(position.y);
-      model.current.modelinstance.position.z = formatCoordinate(position.z);
-      model.current.modelinstance.rotation.x =
-        (degreesToRadians(rotation.x) as number) || 0;
-      model.current.modelinstance.rotation.y =
-        (degreesToRadians(rotation.y) as number) || 0;
-      model.current.modelinstance.rotation.z =
-        (degreesToRadians(rotation.z) as number) || 0;
-      model.current.modelinstance.scale.x = formatCoordinate(scale.x);
-      model.current.modelinstance.scale.y = formatCoordinate(scale.y);
-      model.current.modelinstance.scale.z = formatCoordinate(scale.z);
+    console.log("updating model");
+    if (model && model.current) {
+      model.current.modelinstance.position.x = formatCoordinate(
+        imageToLabel.translateX || 0
+      );
+      model.current.modelinstance.position.y = formatCoordinate(
+        imageToLabel.translateY || 0
+      );
+      model.current.modelinstance.position.z = formatCoordinate(
+        imageToLabel.translateZ || 0
+      );
+      model.current.modelinstance.rotation.x = degreesToRadians(
+        imageToLabel.rotateX || 0
+      ) as number;
+      model.current.modelinstance.rotation.y = degreesToRadians(
+        imageToLabel.rotateY || 0
+      ) as number;
+      model.current.modelinstance.rotation.z = degreesToRadians(
+        imageToLabel.rotateZ || 0
+      ) as number;
+      model.current.modelinstance.scale.x = formatCoordinate(
+        ((imageToLabel.scaleX as number) || 0) * camera.current.position.z
+      );
+      model.current.modelinstance.scale.y = formatCoordinate(
+        ((imageToLabel.scaleY as number) || 0) * camera.current.position.z
+      );
+      model.current.modelinstance.scale.z = formatCoordinate(
+        ((imageToLabel.scaleZ as number) || 0) * camera.current.position.z
+      );
     }
   }, [
-    position.x,
-    position.y,
-    position.z,
-    rotation.x,
-    rotation.y,
-    rotation.z,
-    scale.x,
-    scale.y,
-    scale.z,
-    model.current
+    imageToLabel.translateX,
+    imageToLabel.translateY,
+    imageToLabel.translateZ,
+    imageToLabel.rotateX,
+    imageToLabel.rotateY,
+    imageToLabel.rotateZ,
+    imageToLabel.scaleX,
+    imageToLabel.scaleY,
+    imageToLabel.scaleZ
   ]);
 
   //method for upading gizmo when the mode button is clicked
@@ -168,12 +168,14 @@ const Vis: React.FunctionComponent<IState> = ({
 
   //method for loading new image and model on props change
   useLayoutEffect(() => {
-    addImage(imageUrl);
-  }, [imageUrl]);
+    addImage(imageToLabel.imageUrl);
+    console.log("adding image");
+  }, [imageToLabel.imageUrl]);
 
   useLayoutEffect(() => {
-    addModel(modelUrl);
-  }, [modelUrl]);
+    addModel(imageToLabel.modelUrl);
+    console.log("adding model");
+  }, [imageToLabel.modelUrl]);
 
   function addModel(modelUrl: string) {
     //remove old model
@@ -188,7 +190,11 @@ const Vis: React.FunctionComponent<IState> = ({
       gizmo.current.attach(modelToAdd);
       modelScene.current.add(gizmo.current);
       modelScene!.current.add(modelToAdd);
-      model.current.eventListener = mapModelToState(modelToAdd, setState);
+      model.current.eventListener = mapModelToState(
+        modelToAdd,
+        setState,
+        camera.current
+      );
       gizmo.current.addEventListener("change", model.current.eventListener);
     });
   }
@@ -208,17 +214,30 @@ const Vis: React.FunctionComponent<IState> = ({
     //add new image
     image.current.imageMaterial = new THREE.MeshLambertMaterial({
       map: loaderInst.load(imageUrl, function(img) {
+        //once the image is loaded we can determine it's aspect ratio
         let imageRatio = img.image.naturalWidth / img.image.naturalHeight;
-        //event listeners need to be change to remove/add reference to the function
+
+        //the aspect ratio is then used to determine maximum canvas size
         image.current.currentImageEventListener = handleResize(imageRatio);
         window.addEventListener(
           "resize",
           image.current.currentImageEventListener
         );
         image.current.currentImageEventListener({} as Event);
+
+        //the aspect ratio is then used to determine the image width/height
+        let imgHeight = maximumWidthOrHeightAtZDepth(0, camera.current);
+        let imgWidth = imgHeight * imageRatio;
+
+        image.current.mesh.geometry = new THREE.PlaneGeometry(
+          imgWidth,
+          imgHeight
+        );
+
+        camera.current.aspect = imageRatio;
+        camera.current.updateProjectionMatrix();
       })
     });
-    image.current.imageGeometry = new THREE.PlaneGeometry(1, 1);
 
     // combine our image geometry and material into a mesh
     image.current.mesh = new THREE.Mesh(
@@ -242,31 +261,12 @@ const Vis: React.FunctionComponent<IState> = ({
 
   function handleResize(imageAspectRatio: any) {
     return function() {
+      //determine the canvas width/height
       const { width, height } = determineWidthAndHeight(imageAspectRatio);
 
-      var maxSize = Math.max(width, height);
-      if (renderer.current) renderer.current.setSize(maxSize, maxSize);
+      //update renderer and aspect ratio.
+      if (renderer.current) renderer.current.setSize(width, height);
 
-      let imgHeight: number;
-      let imgWidth: number;
-
-      //image is portrate
-      if (imageAspectRatio < 1) {
-        imgHeight = maximumWidthOrHeightAtZDepth(0, camera.current);
-        imgWidth = imgHeight * imageAspectRatio;
-        setStateImageOffset(0);
-      } //image is landscape
-      else {
-        imgWidth = maximumWidthOrHeightAtZDepth(0, camera.current);
-        imgHeight = imgWidth / imageAspectRatio;
-
-        setStateImageOffset((height - width) / 2); // means image will always be in the top left
-      }
-      image.current.mesh.geometry = new THREE.PlaneGeometry(
-        imgWidth,
-        imgHeight
-      );
-      camera.current.updateProjectionMatrix();
       renderScene();
     };
   }
@@ -298,7 +298,9 @@ const Vis: React.FunctionComponent<IState> = ({
 
   return (
     <div style={{ width: "100%" }}>
-      <Mount ref={mount} shift={imageOffset} />
+      <FlexBox>
+        <Mount ref={mount} />
+      </FlexBox>
     </div>
   );
 };
@@ -307,24 +309,23 @@ const Vis: React.FunctionComponent<IState> = ({
 
 const mapModelToState = (
   model: THREE.Object3D,
-  setState: Dispatch<SetStateAction<IThreeDPosition>>
+  setState: Dispatch<SetStateAction<IimageToBelabelled>>,
+  camera: THREE.PerspectiveCamera
 ) => () => {
-  setState({
-    position: {
-      x: model.position.x,
-      y: model.position.y,
-      z: model.position.z
-    },
-    rotation: {
-      x: radiansToDegrees(model.rotation.x),
-      y: radiansToDegrees(model.rotation.y),
-      z: radiansToDegrees(model.rotation.z)
-    },
-    scale: {
-      x: model.scale.x,
-      y: model.scale.y,
-      z: model.scale.z
-    }
+  setState(prevState => {
+    const newState = {
+      ...prevState,
+      translateX: model.position.x,
+      translateY: model.position.y,
+      translateZ: model.position.z,
+      rotateX: radiansToDegrees(model.rotation.x),
+      rotateY: radiansToDegrees(model.rotation.y),
+      rotateZ: radiansToDegrees(model.rotation.z),
+      scaleX: model.scale.x / camera.position.z,
+      scaleY: model.scale.y / camera.position.z,
+      scaleZ: model.scale.z / camera.position.z
+    };
+    return newState;
   });
 };
 
@@ -342,35 +343,34 @@ const maximumWidthOrHeightAtZDepth = (depth: any, camera: any) => {
 };
 
 function formatCoordinate(coordinate: ICoordinate): number {
-  return coordinate === "-" || coordinate === "" ? 0 : coordinate;
+  return coordinate === "-" || coordinate === "" || coordinate === null
+    ? 0
+    : coordinate;
 }
 
-const radiansToDegrees = (rads: ICoordinate): ICoordinate => {
-  if (rads === "" || rads === "-") return rads;
+const radiansToDegrees = (rads: ICoordinate): number => {
+  if (rads === "" || rads === "-" || rads === null) return rads as any;
   return (rads * 180) / Math.PI;
 };
 
-const degreesToRadians = (degs: ICoordinate): ICoordinate => {
-  if (degs === "" || degs === "-") return degs;
+const degreesToRadians = (degs: ICoordinate): number => {
+  if (degs === "" || degs === "-" || degs === null) return degs as any;
   return (degs / 180) * Math.PI;
 };
 
 //styles
 
-interface scalabe {
-  shift: number;
-  ref: React.MutableRefObject<any>;
-}
+const FlexBox = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+`;
 
-const Mount = styled.div<scalabe>`
+const Mount = styled.div`
   width: 95%;
   display: flex;
-  align-items: center;
   justify-content: center;
-  * {
-    margin-top: ${p => p.shift}px;
-    margin-bottom: ${p => p.shift}px;
-  }
-` as React.FunctionComponent<scalabe>;
+`;
 
 export default Vis;

@@ -2,7 +2,8 @@
 //  This file was automatically generated and should not be edited.
 
 export type CreateImageInput = {
-  url?: string | null,
+  imageUrl?: string | null,
+  modelUrl?: string | null,
   translateX?: number | null,
   translateY?: number | null,
   translateZ?: number | null,
@@ -16,6 +17,9 @@ export type CreateImageInput = {
 };
 
 export type UpdateImageInput = {
+  id?: string | null,
+  imageUrl?: string | null,
+  modelUrl?: string | null,
   translateX?: number | null,
   translateY?: number | null,
   translateZ?: number | null,
@@ -98,7 +102,8 @@ export type CreateImageMutation = {
   createImage:  {
     __typename: "Image",
     id: string | null,
-    url: string | null,
+    imageUrl: string | null,
+    modelUrl: string | null,
     translateX: number | null,
     translateY: number | null,
     translateZ: number | null,
@@ -120,7 +125,8 @@ export type UpdateImageMutation = {
   updateImage:  {
     __typename: "Image",
     id: string | null,
-    url: string | null,
+    imageUrl: string | null,
+    modelUrl: string | null,
     translateX: number | null,
     translateY: number | null,
     translateZ: number | null,
@@ -142,7 +148,8 @@ export type DeleteImageMutation = {
   deleteImage:  {
     __typename: "Image",
     id: string | null,
-    url: string | null,
+    imageUrl: string | null,
+    modelUrl: string | null,
     translateX: number | null,
     translateY: number | null,
     translateZ: number | null,
@@ -164,7 +171,8 @@ export type GetImageQuery = {
   getImage:  {
     __typename: "Image",
     id: string | null,
-    url: string | null,
+    imageUrl: string | null,
+    modelUrl: string | null,
     translateX: number | null,
     translateY: number | null,
     translateZ: number | null,
@@ -190,7 +198,8 @@ export type ListImagesQuery = {
     items:  Array< {
       __typename: "Image",
       id: string | null,
-      url: string | null,
+      imageUrl: string | null,
+      modelUrl: string | null,
       translateX: number | null,
       translateY: number | null,
       translateZ: number | null,
@@ -210,7 +219,8 @@ export type ListUnfinishedImagesQuery = {
   listUnfinishedImages:  Array< {
     __typename: "Image",
     id: string | null,
-    url: string | null,
+    imageUrl: string | null,
+    modelUrl: string | null,
     translateX: number | null,
     translateY: number | null,
     translateZ: number | null,
@@ -236,7 +246,8 @@ export type OnCreateImageSubscription = {
   onCreateImage:  {
     __typename: "Image",
     id: string | null,
-    url: string | null,
+    imageUrl: string | null,
+    modelUrl: string | null,
     translateX: number | null,
     translateY: number | null,
     translateZ: number | null,
@@ -262,7 +273,8 @@ export type OnUpdateImageSubscription = {
   onUpdateImage:  {
     __typename: "Image",
     id: string | null,
-    url: string | null,
+    imageUrl: string | null,
+    modelUrl: string | null,
     translateX: number | null,
     translateY: number | null,
     translateZ: number | null,
@@ -288,7 +300,8 @@ export type OnDeleteImageSubscription = {
   onDeleteImage:  {
     __typename: "Image",
     id: string | null,
-    url: string | null,
+    imageUrl: string | null,
+    modelUrl: string | null,
     translateX: number | null,
     translateY: number | null,
     translateZ: number | null,

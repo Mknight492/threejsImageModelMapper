@@ -5,7 +5,7 @@ import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 
 //graphQL imports
-import CustomProvider from "./apollo/configureProvider";
+import CustomProvider from "./graphql/configureAWSProvider";
 
 //style imports
 import GlobalStyles from "./styles/globalStyles";

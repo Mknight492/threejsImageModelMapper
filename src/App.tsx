@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import ImageModelMapper from "./pages/glasses/container";
+import ImageModelMapper from "./pages/labelingInterface/container";
 
 class App extends Component {
   render() {

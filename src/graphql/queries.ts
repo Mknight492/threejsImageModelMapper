@@ -4,7 +4,8 @@
 export const getImage = `query GetImage($id: ID!) {
   getImage(id: $id) {
     id
-    url
+    imageUrl
+    modelUrl
     translateX
     translateY
     translateZ
@@ -26,7 +27,8 @@ export const listImages = `query ListImages(
   listImages(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       id
-      url
+      imageUrl
+      modelUrl
       translateX
       translateY
       translateZ
@@ -45,7 +47,8 @@ export const listImages = `query ListImages(
 export const listUnfinishedImages = `query ListUnfinishedImages {
   listUnfinishedImages {
     id
-    url
+    imageUrl
+    modelUrl
     translateX
     translateY
     translateZ

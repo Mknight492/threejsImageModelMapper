@@ -16,7 +16,8 @@ export const onCreateImage = `subscription OnCreateImage(
     translateZ: $translateZ
   ) {
     id
-    url
+    imageUrl
+    modelUrl
     translateX
     translateY
     translateZ
@@ -45,7 +46,8 @@ export const onUpdateImage = `subscription OnUpdateImage(
     translateZ: $translateZ
   ) {
     id
-    url
+    imageUrl
+    modelUrl
     translateX
     translateY
     translateZ
@@ -74,7 +76,8 @@ export const onDeleteImage = `subscription OnDeleteImage(
     translateZ: $translateZ
   ) {
     id
-    url
+    imageUrl
+    modelUrl
     translateX
     translateY
     translateZ
