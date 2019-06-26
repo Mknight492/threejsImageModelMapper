@@ -278,20 +278,6 @@ const StyledButton = styled.button<IStyledButton>`
   background-color: ${p => (p.active ? "blue" : "white")};
 ` as React.FunctionComponent<IStyledButton>;
 
-export interface IThreeDPosition {
-  position: ICoordinates;
-  rotation: ICoordinates;
-  scale: ICoordinates;
-}
-
-export interface ICoordinates {
-  x: number | "" | "-";
-  y: number | "" | "-";
-  z: number | "" | "-";
-}
-
-export type ICoordinate = null | number | "" | "-";
-
 export type ITransformControlsType = "translate" | "rotate" | "scale";
 
 export interface IimageToBelabelled {

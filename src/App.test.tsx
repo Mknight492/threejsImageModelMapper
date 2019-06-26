@@ -1,12 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
-import { isSymbol } from "util";
 
-import { mount, shallow, ReactWrapper } from "enzyme";
+import { mount, ReactWrapper } from "enzyme";
 
 import CustomProvider from "./graphql/configureProvider";
-import Button from "./components/buttons/button";
 
 let wrapper: ReactWrapper;
 

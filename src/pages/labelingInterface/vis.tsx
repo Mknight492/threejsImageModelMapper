@@ -7,11 +7,7 @@ import React, {
 import * as THREE from "three";
 
 //models
-import {
-  ITransformControlsType,
-  ICoordinate,
-  IimageToBelabelled
-} from "./container";
+import { ITransformControlsType, IimageToBelabelled } from "./container";
 
 import styled from "styled-components";
 const TransformControls = require("three-transform-ctrls");
@@ -106,7 +102,6 @@ const Vis: React.FunctionComponent<IState> = ({
 
     const stop = () => {
       cancelAnimationFrame(frameId);
-      console.log("stopping");
       frameId = null;
     };
 
@@ -119,7 +114,6 @@ const Vis: React.FunctionComponent<IState> = ({
 
   //method for updating model position if its edited in the form
   useLayoutEffect(() => {
-    console.log("updating model");
     if (model && model.current) {
       model.current.modelinstance.position.x = formatCoordinate(
         imageToLabel.translateX || 0
@@ -169,12 +163,10 @@ const Vis: React.FunctionComponent<IState> = ({
   //method for loading new image and model on props change
   useLayoutEffect(() => {
     addImage(imageToLabel.imageUrl);
-    console.log("adding image");
   }, [imageToLabel.imageUrl]);
 
   useLayoutEffect(() => {
     addModel(imageToLabel.modelUrl);
-    console.log("adding model");
   }, [imageToLabel.modelUrl]);
 
   function addModel(modelUrl: string) {
@@ -259,7 +251,7 @@ const Vis: React.FunctionComponent<IState> = ({
     }
   }
 
-  function handleResize(imageAspectRatio: any) {
+  function handleResize(imageAspectRatio: number) {
     return function() {
       //determine the canvas width/height
       const { width, height } = determineWidthAndHeight(imageAspectRatio);
@@ -271,7 +263,7 @@ const Vis: React.FunctionComponent<IState> = ({
     };
   }
 
-  function determineWidthAndHeight(imageAspectRatio: any) {
+  function determineWidthAndHeight(imageAspectRatio: number) {
     var viewportHeight = Math.max(
       document.documentElement.clientHeight,
       window.innerHeight || 0
@@ -329,7 +321,10 @@ const mapModelToState = (
   });
 };
 
-const maximumWidthOrHeightAtZDepth = (depth: any, camera: any) => {
+const maximumWidthOrHeightAtZDepth = (
+  depth: number,
+  camera: THREE.PerspectiveCamera
+) => {
   // compensate for cameras not positioned at z=0
   const cameraOffset = camera.position.z;
   if (depth < cameraOffset) depth -= cameraOffset;
@@ -342,18 +337,18 @@ const maximumWidthOrHeightAtZDepth = (depth: any, camera: any) => {
   return 2 * Math.tan(vFOV / 2) * Math.abs(depth);
 };
 
-function formatCoordinate(coordinate: ICoordinate): number {
+function formatCoordinate(coordinate: number | "-" | ""): number {
   return coordinate === "-" || coordinate === "" || coordinate === null
     ? 0
     : coordinate;
 }
 
-const radiansToDegrees = (rads: ICoordinate): number => {
+const radiansToDegrees = (rads: number | "-" | ""): number => {
   if (rads === "" || rads === "-" || rads === null) return rads as any;
   return (rads * 180) / Math.PI;
 };
 
-const degreesToRadians = (degs: ICoordinate): number => {
+const degreesToRadians = (degs: number | "-" | ""): number => {
   if (degs === "" || degs === "-" || degs === null) return degs as any;
   return (degs / 180) * Math.PI;
 };
