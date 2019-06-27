@@ -79,6 +79,7 @@ const Vis: React.FunctionComponent<IState> = ({
     renderer.current.autoClear = false;
     renderer.current.setClearColor(0xffffff, 0);
     renderer.current.setPixelRatio(window.devicePixelRatio);
+
     mount.current.appendChild(renderer.current.domElement);
 
     //Transform controls
@@ -181,34 +182,35 @@ const Vis: React.FunctionComponent<IState> = ({
           image.current.currentImageEventListener
         );
 
-      const loaderInst = new THREE.TextureLoader();
+      // const loaderInst = new THREE.TextureLoader();
       //add new image
-      image.current.imageMaterial = new THREE.MeshLambertMaterial({
-        map: loaderInst.load(imageUrl, function(img) {
-          //once the image is loaded we can determine it's aspect ratio
-          let imageRatio = img.image.naturalWidth / img.image.naturalHeight;
+      if (imageUrl)
+        image.current.imageMaterial = new THREE.MeshLambertMaterial({
+          map: image.current.loader.load(imageUrl, function(img) {
+            //once the image is loaded we can determine it's aspect ratio
+            let imageRatio = img.image.naturalWidth / img.image.naturalHeight;
 
-          //the aspect ratio is then used to determine maximum canvas size
-          image.current.currentImageEventListener = handleResize(imageRatio);
-          window.addEventListener(
-            "resize",
-            image.current.currentImageEventListener
-          );
-          image.current.currentImageEventListener({} as Event);
+            //the aspect ratio is then used to determine maximum canvas size
+            image.current.currentImageEventListener = handleResize(imageRatio);
+            window.addEventListener(
+              "resize",
+              image.current.currentImageEventListener
+            );
+            image.current.currentImageEventListener({} as Event);
 
-          //the aspect ratio is then used to determine the image width/height
-          let imgHeight = maximumWidthOrHeightAtZDepth(0, camera.current);
-          let imgWidth = imgHeight * imageRatio;
+            //the aspect ratio is then used to determine the image width/height
+            let imgHeight = maximumWidthOrHeightAtZDepth(0, camera.current);
+            let imgWidth = imgHeight * imageRatio;
 
-          image.current.mesh.geometry = new THREE.PlaneGeometry(
-            imgWidth,
-            imgHeight
-          );
+            image.current.mesh.geometry = new THREE.PlaneGeometry(
+              imgWidth,
+              imgHeight
+            );
 
-          camera.current.aspect = imageRatio;
-          camera.current.updateProjectionMatrix();
-        })
-      });
+            camera.current.aspect = imageRatio;
+            camera.current.updateProjectionMatrix();
+          })
+        });
 
       // combine our image geometry and material into a mesh
       image.current.mesh = new THREE.Mesh(
@@ -244,21 +246,23 @@ const Vis: React.FunctionComponent<IState> = ({
       modelScene.current.remove(model.current.modelinstance);
       gizmo.current.removeEventListener("change", model.current.eventListener);
       //add new model
-      model.current.loader.load(modelUrl, (modelToAdd: THREE.Object3D) => {
-        let scale = camera.current.position.z;
-        modelToAdd.scale.set(scale, scale, scale);
-        modelToAdd.position.z = 600;
-        model.current.modelinstance = modelToAdd;
-        gizmo.current.attach(modelToAdd);
-        modelScene.current.add(gizmo.current);
-        modelScene!.current.add(modelToAdd);
-        model.current.eventListener = mapModelToState(
-          modelToAdd,
-          setState,
-          camera.current
-        );
-        gizmo.current.addEventListener("change", model.current.eventListener);
-      });
+      if (modelUrl) {
+        model.current.loader.load(modelUrl, (modelToAdd: THREE.Object3D) => {
+          let scale = camera.current.position.z;
+          modelToAdd.scale.set(scale, scale, scale);
+          modelToAdd.position.z = 600;
+          model.current.modelinstance = modelToAdd;
+          gizmo.current.attach(modelToAdd);
+          modelScene.current.add(gizmo.current);
+          modelScene!.current.add(modelToAdd);
+          model.current.eventListener = mapModelToState(
+            modelToAdd,
+            setState,
+            camera.current
+          );
+          gizmo.current.addEventListener("change", model.current.eventListener);
+        });
+      }
     }
   }, [imageToLabel.modelUrl, setState]);
 
@@ -274,8 +278,10 @@ const Vis: React.FunctionComponent<IState> = ({
       document.documentElement.clientHeight,
       window.innerHeight || 0
     );
-    var maxHeight = viewportHeight - 40; //this is the height of the title
-    let maxWidth = mount.current.getBoundingClientRect().width;
+
+    const { top, width } = mount.current.getBoundingClientRect();
+    var maxHeight = viewportHeight - top; //this is the height of the title
+    let maxWidth = width;
 
     let sizeByWidth = {
       width: maxWidth,
@@ -297,7 +303,7 @@ const Vis: React.FunctionComponent<IState> = ({
   return (
     <div style={{ width: "100%" }}>
       <FlexBox>
-        <Mount ref={mount} />
+        <Mount ref={mount} active={imageToLabel.imageUrl !== ""} />
       </FlexBox>
     </div>
   );
@@ -367,13 +373,18 @@ const FlexBox = styled.div`
   align-items: center;
 `;
 
-const Mount = styled.div`
+interface IMount {
+  active: Boolean;
+  ref: any;
+}
+
+const Mount = styled.div<IMount>`
   width: 95%;
   display: flex;
   justify-content: center;
   * {
-    border: 2px solid black;
+    ${p => (p.active ? "border: 2px solid black" : "")};
   }
-`;
+` as React.FunctionComponent<IMount>;
 
 export default Vis;

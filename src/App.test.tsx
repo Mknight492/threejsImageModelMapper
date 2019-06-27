@@ -4,7 +4,7 @@ import App from "./App";
 
 import { mount, ReactWrapper } from "enzyme";
 
-import CustomProvider from "./graphql/configureProvider";
+import CustomProvider from "./graphql/configureAWSProvider";
 
 let wrapper: ReactWrapper;
 

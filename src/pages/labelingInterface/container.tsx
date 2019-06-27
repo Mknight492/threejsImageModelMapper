@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, Dispatch, SetStateAction } from "react";
 
 //styles
 import styled from "styled-components";
@@ -18,12 +18,15 @@ import Test from "./vis";
 import Loading from "../../components/loading/loading";
 import Error from "../../components/error/error";
 
+//models/interfaces/type
+import { IPages } from "../../App";
+
 const initialState = (
   imageToBelabelled?: IimageToBelabelled
 ): IimageToBelabelled => ({
   id: imageToBelabelled ? imageToBelabelled.id : "",
   imageUrl: imageToBelabelled ? imageToBelabelled.imageUrl : "",
-  modelUrl: imageToBelabelled ? imageToBelabelled.modelUrl : " ",
+  modelUrl: imageToBelabelled ? imageToBelabelled.modelUrl : "",
   translateX: 0,
   translateY: 0,
   translateZ: 600,
@@ -36,7 +39,13 @@ const initialState = (
   finished: "false"
 });
 
-const ImageToModalMapper = () => {
+interface IProps {
+  setStatePage: Dispatch<SetStateAction<IPages>>;
+}
+
+const ImageToModalMapper: React.FunctionComponent<IProps> = ({
+  setStatePage
+}) => {
   const [model3DpositionState, setStateModel3Dposition] = useState(
     initialState()
   );
@@ -82,7 +91,6 @@ const ImageToModalMapper = () => {
       {({ loading, error, data }) => {
         if (loading) return <Loading />;
         if (error) return <Error error={error} />;
-        console.log(data);
         if (data && data.imagesByFinished && data.imagesByFinished.items) {
           const { items } = data.imagesByFinished;
           if (
@@ -91,19 +99,21 @@ const ImageToModalMapper = () => {
             items[0].id &&
             model3DpositionState.id === ""
           ) {
-            console.log("setting initial image");
             setStateModel3Dposition(initialState(items[0]));
-          } //
+          }
           return (
             <Wrapper>
               <Box>
-                <Title>Image 1</Title>
+                <Title>
+                  {model3DpositionState.imageUrl || "No images remaining"}
+                </Title>
                 <Row>
                   <Test
                     imageToLabel={{ ...model3DpositionState }}
                     setState={setStateModel3Dposition}
                     gizmoState={gizmoState}
                   />
+
                   <Positions>
                     <h3> Position</h3>
                     <label htmlFor="positionx">x</label>
@@ -123,12 +133,6 @@ const ImageToModalMapper = () => {
                         model3DpositionState.translateY
                       )}
                     />
-                    {/* <label htmlFor="positionz">z</label>
-                    <input
-                      id="positionz"
-                      onChange={handleChange("translateZ")}
-                      value={FormatFloatForDisplay() model3DpositionState.translateZ}
-                    /> */}
                     <h3> Rotation</h3>
                     <label htmlFor="rotationx">x</label>
                     <input
@@ -237,6 +241,9 @@ const ImageToModalMapper = () => {
                         </StyledButton>
                       )}
                     </Mutation>
+                    <StyledButton onClick={() => setStatePage("addingImages")}>
+                      Add new Images
+                    </StyledButton>
                   </Positions>
                 </Row>
               </Box>
