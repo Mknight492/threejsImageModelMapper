@@ -9,8 +9,12 @@ import * as THREE from "three";
 //models
 import { ITransformControlsType, IimageToBelabelled } from "./container";
 
+//styles
 import styled from "styled-components";
-const TransformControls = require("three-transform-ctrls");
+
+//misc
+//had to customis
+import TransformControls from "../../misc/transformControls";
 
 interface IState {
   imageToLabel: IimageToBelabelled;
@@ -65,7 +69,7 @@ const Vis: React.FunctionComponent<IState> = ({
   // this function is called once on component mounting and sets up the threejs canvas
   useLayoutEffect(() => {
     let frameId: any;
-    camera.current.position.z = 40;
+    camera.current.position.z = 1000;
     camera.current.lookAt(new THREE.Vector3(0, 0, 0));
     let rendererInstance = new THREE.WebGLRenderer({
       antialias: true,
@@ -84,6 +88,7 @@ const Vis: React.FunctionComponent<IState> = ({
     );
     control.addEventListener("change", renderScene);
     control.scope = "global";
+
     gizmo.current = control; //add reference to the controls so can be used out of
 
     var amb = new THREE.AmbientLight(0xffffff, 1);
@@ -157,110 +162,111 @@ const Vis: React.FunctionComponent<IState> = ({
 
   //method for upading gizmo when the mode button is clicked
   useLayoutEffect(() => {
+    gizmo.current.showZ = gizmoState !== "translate"; // hide the Z-Index handle if mode is translate
     gizmo.current.setMode(gizmoState);
   }, [gizmoState]);
 
   //method for loading new image and model on props change
   useLayoutEffect(() => {
     addImage(imageToLabel.imageUrl);
+
+    function addImage(imageUrl: string) {
+      //remove old image
+      if (image.current.mesh) imageScene.current.remove(image.current.mesh);
+      if (image.current.imageGeometry) image.current.imageGeometry.dispose();
+      if (image.current.imageMaterial) image.current.imageMaterial.dispose();
+      if (image.current.currentImageEventListener)
+        window.removeEventListener(
+          "resize",
+          image.current.currentImageEventListener
+        );
+
+      const loaderInst = new THREE.TextureLoader();
+      //add new image
+      image.current.imageMaterial = new THREE.MeshLambertMaterial({
+        map: loaderInst.load(imageUrl, function(img) {
+          //once the image is loaded we can determine it's aspect ratio
+          let imageRatio = img.image.naturalWidth / img.image.naturalHeight;
+
+          //the aspect ratio is then used to determine maximum canvas size
+          image.current.currentImageEventListener = handleResize(imageRatio);
+          window.addEventListener(
+            "resize",
+            image.current.currentImageEventListener
+          );
+          image.current.currentImageEventListener({} as Event);
+
+          //the aspect ratio is then used to determine the image width/height
+          let imgHeight = maximumWidthOrHeightAtZDepth(0, camera.current);
+          let imgWidth = imgHeight * imageRatio;
+
+          image.current.mesh.geometry = new THREE.PlaneGeometry(
+            imgWidth,
+            imgHeight
+          );
+
+          camera.current.aspect = imageRatio;
+          camera.current.updateProjectionMatrix();
+        })
+      });
+
+      // combine our image geometry and material into a mesh
+      image.current.mesh = new THREE.Mesh(
+        image.current.imageGeometry,
+        image.current.imageMaterial
+      );
+
+      // set the position of the image mesh in the x,y,z dimensions
+      image.current.mesh.position.set(0, 0, imageZ);
+
+      // add the image to the scene
+      imageScene.current.add(image.current.mesh); //need to overcome
+    }
+
+    function handleResize(imageAspectRatio: number) {
+      return function() {
+        //determine the canvas width/height
+        const { width, height } = determineWidthAndHeight(imageAspectRatio);
+
+        //update renderer and aspect ratio.
+        if (renderer.current) renderer.current.setSize(width, height);
+
+        renderScene();
+      };
+    }
   }, [imageToLabel.imageUrl]);
 
   useLayoutEffect(() => {
     addModel(imageToLabel.modelUrl);
-  }, [imageToLabel.modelUrl]);
 
-  function addModel(modelUrl: string) {
-    //remove old model
-    modelScene.current.remove(model.current.modelinstance);
-    gizmo.current.removeEventListener("change", model.current.eventListener);
-    //add new model
-    model.current.loader.load(modelUrl, (modelToAdd: THREE.Object3D) => {
-      let scale = camera.current.position.z;
-      modelToAdd.scale.set(scale, scale, scale);
-      modelToAdd.position.z = 10;
-      model.current.modelinstance = modelToAdd;
-      gizmo.current.attach(modelToAdd);
-      modelScene.current.add(gizmo.current);
-      modelScene!.current.add(modelToAdd);
-      model.current.eventListener = mapModelToState(
-        modelToAdd,
-        setState,
-        camera.current
-      );
-      gizmo.current.addEventListener("change", model.current.eventListener);
-    });
-  }
-
-  function addImage(imageUrl: string) {
-    //remove old image
-    if (image.current.mesh) imageScene.current.remove(image.current.mesh);
-    if (image.current.imageGeometry) image.current.imageGeometry.dispose();
-    if (image.current.imageMaterial) image.current.imageMaterial.dispose();
-    if (image.current.currentImageEventListener)
-      window.removeEventListener(
-        "resize",
-        image.current.currentImageEventListener
-      );
-
-    const loaderInst = new THREE.TextureLoader();
-    //add new image
-    image.current.imageMaterial = new THREE.MeshLambertMaterial({
-      map: loaderInst.load(imageUrl, function(img) {
-        //once the image is loaded we can determine it's aspect ratio
-        let imageRatio = img.image.naturalWidth / img.image.naturalHeight;
-
-        //the aspect ratio is then used to determine maximum canvas size
-        image.current.currentImageEventListener = handleResize(imageRatio);
-        window.addEventListener(
-          "resize",
-          image.current.currentImageEventListener
+    function addModel(modelUrl: string) {
+      //remove old model
+      modelScene.current.remove(model.current.modelinstance);
+      gizmo.current.removeEventListener("change", model.current.eventListener);
+      //add new model
+      model.current.loader.load(modelUrl, (modelToAdd: THREE.Object3D) => {
+        let scale = camera.current.position.z;
+        modelToAdd.scale.set(scale, scale, scale);
+        modelToAdd.position.z = 600;
+        model.current.modelinstance = modelToAdd;
+        gizmo.current.attach(modelToAdd);
+        modelScene.current.add(gizmo.current);
+        modelScene!.current.add(modelToAdd);
+        model.current.eventListener = mapModelToState(
+          modelToAdd,
+          setState,
+          camera.current
         );
-        image.current.currentImageEventListener({} as Event);
-
-        //the aspect ratio is then used to determine the image width/height
-        let imgHeight = maximumWidthOrHeightAtZDepth(0, camera.current);
-        let imgWidth = imgHeight * imageRatio;
-
-        image.current.mesh.geometry = new THREE.PlaneGeometry(
-          imgWidth,
-          imgHeight
-        );
-
-        camera.current.aspect = imageRatio;
-        camera.current.updateProjectionMatrix();
-      })
-    });
-
-    // combine our image geometry and material into a mesh
-    image.current.mesh = new THREE.Mesh(
-      image.current.imageGeometry,
-      image.current.imageMaterial
-    );
-
-    // set the position of the image mesh in the x,y,z dimensions
-    image.current.mesh.position.set(0, 0, imageZ);
-
-    // add the image to the scene
-    imageScene.current.add(image.current.mesh); //need to overcome
-  }
+        gizmo.current.addEventListener("change", model.current.eventListener);
+      });
+    }
+  }, [imageToLabel.modelUrl, setState]);
 
   function renderScene() {
     if (renderer.current && camera.current) {
       renderer.current.render(imageScene.current, camera.current);
       renderer.current.render(modelScene.current, camera.current);
     }
-  }
-
-  function handleResize(imageAspectRatio: number) {
-    return function() {
-      //determine the canvas width/height
-      const { width, height } = determineWidthAndHeight(imageAspectRatio);
-
-      //update renderer and aspect ratio.
-      if (renderer.current) renderer.current.setSize(width, height);
-
-      renderScene();
-    };
   }
 
   function determineWidthAndHeight(imageAspectRatio: number) {
@@ -309,7 +315,7 @@ const mapModelToState = (
       ...prevState,
       translateX: model.position.x,
       translateY: model.position.y,
-      translateZ: model.position.z,
+      translateZ: 600,
       rotateX: radiansToDegrees(model.rotation.x),
       rotateY: radiansToDegrees(model.rotation.y),
       rotateZ: radiansToDegrees(model.rotation.z),
@@ -354,7 +360,6 @@ const degreesToRadians = (degs: number | "-" | ""): number => {
 };
 
 //styles
-
 const FlexBox = styled.div`
   display: flex;
   width: 100%;
@@ -366,6 +371,9 @@ const Mount = styled.div`
   width: 95%;
   display: flex;
   justify-content: center;
+  * {
+    border: 2px solid black;
+  }
 `;
 
 export default Vis;

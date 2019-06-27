@@ -1,0 +1,21 @@
+type Image
+  @model
+  @key(
+    name: "ByFinished"
+    fields: ["finished"]
+    queryField: "imagesByFinished"
+  ) {
+  id: ID
+  imageUrl: String!
+  modelUrl: String!
+  translateX: Float
+  translateY: Float
+  translateZ: Float
+  rotateX: Float
+  rotateY: Float
+  rotateZ: Float
+  scaleX: Float
+  scaleY: Float
+  scaleZ: Float
+  finished: String!
+}

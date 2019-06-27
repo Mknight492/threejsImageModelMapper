@@ -1,20 +1,8 @@
 // tslint:disable
 // this is an auto generated file. This will be overwritten
 
-export const onCreateImage = `subscription OnCreateImage(
-  $id: ID
-  $url: String
-  $translateX: Float
-  $translateY: Float
-  $translateZ: Float
-) {
-  onCreateImage(
-    id: $id
-    url: $url
-    translateX: $translateX
-    translateY: $translateY
-    translateZ: $translateZ
-  ) {
+export const onCreateImage = `subscription OnCreateImage {
+  onCreateImage {
     id
     imageUrl
     modelUrl
@@ -31,20 +19,8 @@ export const onCreateImage = `subscription OnCreateImage(
   }
 }
 `;
-export const onUpdateImage = `subscription OnUpdateImage(
-  $id: ID
-  $url: String
-  $translateX: Float
-  $translateY: Float
-  $translateZ: Float
-) {
-  onUpdateImage(
-    id: $id
-    url: $url
-    translateX: $translateX
-    translateY: $translateY
-    translateZ: $translateZ
-  ) {
+export const onUpdateImage = `subscription OnUpdateImage {
+  onUpdateImage {
     id
     imageUrl
     modelUrl
@@ -61,20 +37,8 @@ export const onUpdateImage = `subscription OnUpdateImage(
   }
 }
 `;
-export const onDeleteImage = `subscription OnDeleteImage(
-  $id: ID
-  $url: String
-  $translateX: Float
-  $translateY: Float
-  $translateZ: Float
-) {
-  onDeleteImage(
-    id: $id
-    url: $url
-    translateX: $translateX
-    translateY: $translateY
-    translateZ: $translateZ
-  ) {
+export const onDeleteImage = `subscription OnDeleteImage {
+  onDeleteImage {
     id
     imageUrl
     modelUrl

@@ -46,7 +46,7 @@
             "description" : null,
             "type" : {
               "kind" : "INPUT_OBJECT",
-              "name" : "TableImageFilterInput",
+              "name" : "ModelImageFilterInput",
               "ofType" : null
             },
             "defaultValue" : null
@@ -71,23 +71,55 @@
           } ],
           "type" : {
             "kind" : "OBJECT",
-            "name" : "ImageConnection",
+            "name" : "ModelImageConnection",
             "ofType" : null
           },
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "listUnfinishedImages",
+          "name" : "imagesByFinished",
           "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "LIST",
-            "name" : null,
-            "ofType" : {
-              "kind" : "OBJECT",
-              "name" : "Image",
+          "args" : [ {
+            "name" : "finished",
+            "description" : null,
+            "type" : {
+              "kind" : "SCALAR",
+              "name" : "String",
               "ofType" : null
-            }
+            },
+            "defaultValue" : null
+          }, {
+            "name" : "filter",
+            "description" : null,
+            "type" : {
+              "kind" : "INPUT_OBJECT",
+              "name" : "ModelImageFilterInput",
+              "ofType" : null
+            },
+            "defaultValue" : null
+          }, {
+            "name" : "limit",
+            "description" : null,
+            "type" : {
+              "kind" : "SCALAR",
+              "name" : "Int",
+              "ofType" : null
+            },
+            "defaultValue" : null
+          }, {
+            "name" : "nextToken",
+            "description" : null,
+            "type" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            },
+            "defaultValue" : null
+          } ],
+          "type" : {
+            "kind" : "OBJECT",
+            "name" : "ModelImageConnection",
+            "ofType" : null
           },
           "isDeprecated" : false,
           "deprecationReason" : null
@@ -116,9 +148,13 @@
           "description" : null,
           "args" : [ ],
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
           },
           "isDeprecated" : false,
           "deprecationReason" : null
@@ -127,9 +163,13 @@
           "description" : null,
           "args" : [ ],
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
           },
           "isDeprecated" : false,
           "deprecationReason" : null
@@ -237,9 +277,13 @@
           "description" : null,
           "args" : [ ],
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "Boolean",
-            "ofType" : null
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
           },
           "isDeprecated" : false,
           "deprecationReason" : null
@@ -276,17 +320,8 @@
         "enumValues" : null,
         "possibleTypes" : null
       }, {
-        "kind" : "SCALAR",
-        "name" : "Boolean",
-        "description" : "Built-in Boolean",
-        "fields" : null,
-        "inputFields" : null,
-        "interfaces" : null,
-        "enumValues" : null,
-        "possibleTypes" : null
-      }, {
         "kind" : "OBJECT",
-        "name" : "ImageConnection",
+        "name" : "ModelImageConnection",
         "description" : null,
         "fields" : [ {
           "name" : "items",
@@ -321,7 +356,7 @@
         "possibleTypes" : null
       }, {
         "kind" : "INPUT_OBJECT",
-        "name" : "TableImageFilterInput",
+        "name" : "ModelImageFilterInput",
         "description" : null,
         "fields" : null,
         "inputFields" : [ {
@@ -329,16 +364,25 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableIDFilterInput",
+            "name" : "ModelIDFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
         }, {
-          "name" : "url",
+          "name" : "imageUrl",
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableStringFilterInput",
+            "name" : "ModelStringFilterInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "modelUrl",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelStringFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -347,7 +391,7 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableFloatFilterInput",
+            "name" : "ModelFloatFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -356,7 +400,7 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableFloatFilterInput",
+            "name" : "ModelFloatFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -365,7 +409,7 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableFloatFilterInput",
+            "name" : "ModelFloatFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -374,7 +418,7 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableFloatFilterInput",
+            "name" : "ModelFloatFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -383,7 +427,7 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableFloatFilterInput",
+            "name" : "ModelFloatFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -392,7 +436,7 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableFloatFilterInput",
+            "name" : "ModelFloatFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -401,7 +445,7 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableFloatFilterInput",
+            "name" : "ModelFloatFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -410,7 +454,7 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableFloatFilterInput",
+            "name" : "ModelFloatFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -419,7 +463,7 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableFloatFilterInput",
+            "name" : "ModelFloatFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -428,7 +472,42 @@
           "description" : null,
           "type" : {
             "kind" : "INPUT_OBJECT",
-            "name" : "TableBooleanFilterInput",
+            "name" : "ModelStringFilterInput",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "and",
+          "description" : null,
+          "type" : {
+            "kind" : "LIST",
+            "name" : null,
+            "ofType" : {
+              "kind" : "INPUT_OBJECT",
+              "name" : "ModelImageFilterInput",
+              "ofType" : null
+            }
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "or",
+          "description" : null,
+          "type" : {
+            "kind" : "LIST",
+            "name" : null,
+            "ofType" : {
+              "kind" : "INPUT_OBJECT",
+              "name" : "ModelImageFilterInput",
+              "ofType" : null
+            }
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "not",
+          "description" : null,
+          "type" : {
+            "kind" : "INPUT_OBJECT",
+            "name" : "ModelImageFilterInput",
             "ofType" : null
           },
           "defaultValue" : null
@@ -438,7 +517,7 @@
         "possibleTypes" : null
       }, {
         "kind" : "INPUT_OBJECT",
-        "name" : "TableIDFilterInput",
+        "name" : "ModelIDFilterInput",
         "description" : null,
         "fields" : null,
         "inputFields" : [ {
@@ -541,7 +620,7 @@
         "possibleTypes" : null
       }, {
         "kind" : "INPUT_OBJECT",
-        "name" : "TableStringFilterInput",
+        "name" : "ModelStringFilterInput",
         "description" : null,
         "fields" : null,
         "inputFields" : [ {
@@ -644,7 +723,7 @@
         "possibleTypes" : null
       }, {
         "kind" : "INPUT_OBJECT",
-        "name" : "TableFloatFilterInput",
+        "name" : "ModelFloatFilterInput",
         "description" : null,
         "fields" : null,
         "inputFields" : [ {
@@ -730,33 +809,6 @@
               "name" : "Float",
               "ofType" : null
             }
-          },
-          "defaultValue" : null
-        } ],
-        "interfaces" : null,
-        "enumValues" : null,
-        "possibleTypes" : null
-      }, {
-        "kind" : "INPUT_OBJECT",
-        "name" : "TableBooleanFilterInput",
-        "description" : null,
-        "fields" : null,
-        "inputFields" : [ {
-          "name" : "ne",
-          "description" : null,
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "Boolean",
-            "ofType" : null
-          },
-          "defaultValue" : null
-        }, {
-          "name" : "eq",
-          "description" : null,
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "Boolean",
-            "ofType" : null
           },
           "defaultValue" : null
         } ],
@@ -859,21 +911,38 @@
         "description" : null,
         "fields" : null,
         "inputFields" : [ {
-          "name" : "imageUrl",
+          "name" : "id",
           "description" : null,
           "type" : {
             "kind" : "SCALAR",
-            "name" : "String",
+            "name" : "ID",
             "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "imageUrl",
+          "description" : null,
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
           },
           "defaultValue" : null
         }, {
           "name" : "modelUrl",
           "description" : null,
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
           },
           "defaultValue" : null
         }, {
@@ -961,9 +1030,13 @@
           "name" : "finished",
           "description" : null,
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "String",
-            "ofType" : null
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "String",
+              "ofType" : null
+            }
           },
           "defaultValue" : null
         } ],
@@ -979,9 +1052,13 @@
           "name" : "id",
           "description" : null,
           "type" : {
-            "kind" : "SCALAR",
-            "name" : "ID",
-            "ofType" : null
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "ID",
+              "ofType" : null
+            }
           },
           "defaultValue" : null
         }, {
@@ -1105,13 +1182,9 @@
           "name" : "id",
           "description" : null,
           "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "ID",
-              "ofType" : null
-            }
+            "kind" : "SCALAR",
+            "name" : "ID",
+            "ofType" : null
           },
           "defaultValue" : null
         } ],
@@ -1125,52 +1198,7 @@
         "fields" : [ {
           "name" : "onCreateImage",
           "description" : null,
-          "args" : [ {
-            "name" : "id",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "ID",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "url",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "String",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "translateX",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Float",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "translateY",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Float",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "translateZ",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Float",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          } ],
+          "args" : [ ],
           "type" : {
             "kind" : "OBJECT",
             "name" : "Image",
@@ -1181,52 +1209,7 @@
         }, {
           "name" : "onUpdateImage",
           "description" : null,
-          "args" : [ {
-            "name" : "id",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "ID",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "url",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "String",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "translateX",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Float",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "translateY",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Float",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "translateZ",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Float",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          } ],
+          "args" : [ ],
           "type" : {
             "kind" : "OBJECT",
             "name" : "Image",
@@ -1237,52 +1220,7 @@
         }, {
           "name" : "onDeleteImage",
           "description" : null,
-          "args" : [ {
-            "name" : "id",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "ID",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "url",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "String",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "translateX",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Float",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "translateY",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Float",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "translateZ",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Float",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          } ],
+          "args" : [ ],
           "type" : {
             "kind" : "OBJECT",
             "name" : "Image",
@@ -1297,7 +1235,7 @@
         "possibleTypes" : null
       }, {
         "kind" : "INPUT_OBJECT",
-        "name" : "TableIntFilterInput",
+        "name" : "ModelIntFilterInput",
         "description" : null,
         "fields" : null,
         "inputFields" : [ {
@@ -1388,6 +1326,61 @@
         } ],
         "interfaces" : null,
         "enumValues" : null,
+        "possibleTypes" : null
+      }, {
+        "kind" : "INPUT_OBJECT",
+        "name" : "ModelBooleanFilterInput",
+        "description" : null,
+        "fields" : null,
+        "inputFields" : [ {
+          "name" : "ne",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Boolean",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        }, {
+          "name" : "eq",
+          "description" : null,
+          "type" : {
+            "kind" : "SCALAR",
+            "name" : "Boolean",
+            "ofType" : null
+          },
+          "defaultValue" : null
+        } ],
+        "interfaces" : null,
+        "enumValues" : null,
+        "possibleTypes" : null
+      }, {
+        "kind" : "SCALAR",
+        "name" : "Boolean",
+        "description" : "Built-in Boolean",
+        "fields" : null,
+        "inputFields" : null,
+        "interfaces" : null,
+        "enumValues" : null,
+        "possibleTypes" : null
+      }, {
+        "kind" : "ENUM",
+        "name" : "ModelSortDirection",
+        "description" : null,
+        "fields" : null,
+        "inputFields" : null,
+        "interfaces" : null,
+        "enumValues" : [ {
+          "name" : "ASC",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "DESC",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        } ],
         "possibleTypes" : null
       }, {
         "kind" : "OBJECT",

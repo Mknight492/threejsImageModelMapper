@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 //graphQL
 import { Query, Mutation } from "react-apollo";
-import { listUnfinishedImages } from "../../graphql/queries";
+import { imagesByFinished } from "../../graphql/queries";
 import { updateImage } from "../../graphql/mutations";
 import gql from "graphql-tag";
 import { UpdateImageMutation, UpdateImageMutationVariables } from "../../API";
@@ -23,7 +23,7 @@ const initialState = (
   modelUrl: imageToBelabelled ? imageToBelabelled.modelUrl : " ",
   translateX: 0,
   translateY: 0,
-  translateZ: 10,
+  translateZ: 600,
   rotateX: 0,
   rotateY: 0,
   rotateZ: 0,
@@ -72,22 +72,24 @@ const ImageToModalMapper = () => {
 
   return (
     <Query<listUnfinishedImagesQuery>
-      query={gql(listUnfinishedImages)}
+      query={gql(imagesByFinished)}
+      variables={{ finished: "false" }}
       fetchPolicy="network-only"
     >
       {({ loading, error, data }) => {
         if (loading) return <Loading />;
         if (error) return <Error error={error} />;
-
-        if (data) {
-          const { listUnfinishedImages } = data;
+        console.log(data);
+        if (data && data.imagesByFinished && data.imagesByFinished.items) {
+          const { items } = data.imagesByFinished;
           if (
-            listUnfinishedImages[0] &&
-            listUnfinishedImages[0].id &&
+            items &&
+            items[0] &&
+            items[0].id &&
             model3DpositionState.id === ""
           ) {
             console.log("setting initial image");
-            setStateModel3Dposition(initialState(listUnfinishedImages[0]));
+            setStateModel3Dposition(initialState(items[0]));
           } //
           return (
             <Wrapper>
@@ -105,66 +107,68 @@ const ImageToModalMapper = () => {
                     <input
                       id="positionx"
                       onChange={handleChange("translateX")}
-                      value={model3DpositionState.translateX}
-                      type="number"
+                      value={FormatFloatForDisplay(
+                        model3DpositionState.translateX
+                      )}
+                      type="text"
                     />
                     <label htmlFor="positiony">y</label>
                     <input
                       id="positiony"
                       onChange={handleChange("translateY")}
-                      value={model3DpositionState.translateY}
-                      type="number"
+                      value={FormatFloatForDisplay(
+                        model3DpositionState.translateY
+                      )}
                     />
-                    <label htmlFor="positionz">z</label>
+                    {/* <label htmlFor="positionz">z</label>
                     <input
                       id="positionz"
                       onChange={handleChange("translateZ")}
-                      value={model3DpositionState.translateZ}
-                      type="number"
-                    />
+                      value={FormatFloatForDisplay() model3DpositionState.translateZ}
+                    /> */}
                     <h3> Rotation</h3>
                     <label htmlFor="rotationx">x</label>
                     <input
                       id="rotationx"
                       onChange={handleChange("rotateX")}
-                      value={model3DpositionState.rotateX || "0"}
-                      type="number"
+                      value={FormatFloatForDisplay(
+                        model3DpositionState.rotateX
+                      )}
                     />
                     <label htmlFor="rotationy">y</label>
                     <input
                       id="rotationy"
                       onChange={handleChange("rotateY")}
-                      value={model3DpositionState.rotateY || "0"}
-                      type="number"
+                      value={FormatFloatForDisplay(
+                        model3DpositionState.rotateY
+                      )}
                     />
                     <label htmlFor="rotationz">z</label>
                     <input
                       id="rotationz"
                       onChange={handleChange("rotateZ")}
-                      value={model3DpositionState.rotateZ || "0"}
-                      type="number"
+                      value={FormatFloatForDisplay(
+                        model3DpositionState.rotateZ
+                      )}
                     />
                     <h3> Scale</h3>
                     <label htmlFor="scalex">x</label>
                     <input
                       id="scalex"
                       onChange={handleChange("scaleX")}
-                      value={model3DpositionState.scaleX || "0"}
-                      type="number"
+                      value={FormatFloatForDisplay(model3DpositionState.scaleX)}
                     />
                     <label htmlFor="scaley">y</label>
                     <input
                       id="scaley"
                       onChange={handleChange("scaleY")}
-                      value={model3DpositionState.scaleY || "0"}
-                      type="number"
+                      value={FormatFloatForDisplay(model3DpositionState.scaleY)}
                     />
                     <label htmlFor="scalez">z</label>
                     <input
                       id="scalez"
                       onChange={handleChange("scaleZ")}
-                      value={model3DpositionState.scaleZ || "0"}
-                      type="number"
+                      value={FormatFloatForDisplay(model3DpositionState.scaleZ)}
                     />
                     <StyledButton
                       active={gizmoState === "translate"}
@@ -192,7 +196,9 @@ const ImageToModalMapper = () => {
                     </StyledButton>
                     <StyledButton
                       onClick={() => {
-                        setStateModel3Dposition(initialState());
+                        setStateModel3Dposition(
+                          initialState(model3DpositionState)
+                        );
                       }}
                     >
                       reset
@@ -203,23 +209,24 @@ const ImageToModalMapper = () => {
                       {sendMutation => (
                         <StyledButton
                           onClick={async () => {
-                            await sendMutation({
-                              variables: {
-                                input: {
-                                  ...model3DpositionState,
-                                  finished: "true" as any
+                            if (model3DpositionState.id !== "") {
+                              await sendMutation({
+                                variables: {
+                                  input: {
+                                    ...model3DpositionState,
+                                    finished: "true" as any
+                                  }
                                 }
+                              });
+                              const currentIndex = items.findIndex(
+                                item => item.id === model3DpositionState.id
+                              );
+                              const nextItem = items[currentIndex + 1];
+                              if (nextItem)
+                                setStateModel3Dposition(initialState(nextItem));
+                              else {
+                                document.location.reload();
                               }
-                            });
-                            const currentIndex = data.listUnfinishedImages.findIndex(
-                              item => item.id === model3DpositionState.id
-                            );
-                            const nextItem =
-                              data.listUnfinishedImages[currentIndex + 1];
-                            if (nextItem)
-                              setStateModel3Dposition(initialState(nextItem));
-                            else {
-                              document.location.reload();
                             }
                           }}
                         >
@@ -238,6 +245,14 @@ const ImageToModalMapper = () => {
   );
 };
 
+const FormatFloatForDisplay = (numberToDisplay: number): number | string => {
+  const formatedNumber = new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: 4
+  }).format(numberToDisplay);
+  if (formatedNumber === "0") return "";
+  return formatedNumber;
+};
+
 const Wrapper = styled.div`
   width: 100%;
   height: 100%;
@@ -250,6 +265,7 @@ const Box = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 10px;
 `;
 
 const Title = styled.h2`
@@ -257,10 +273,14 @@ const Title = styled.h2`
 `;
 
 const Row = styled.div`
-  width: 100%;
+  width: 80%;
   display: flex;
-  flex-direction: row;
-  flex: 0.7 0.3;
+  flex-direction: column;
+  @media (min-width: 600px) {
+    width: 100%;
+    flex-direction: row;
+    flex: 0.7 0.3;
+  }
 `;
 
 const Positions = styled.div`
@@ -275,7 +295,7 @@ interface IStyledButton {
 
 const StyledButton = styled.button<IStyledButton>`
   margin-top: 15px;
-  background-color: ${p => (p.active ? "blue" : "white")};
+  background-color: ${p => (p.active ? "rgb(136, 188, 236)" : "white")};
 ` as React.FunctionComponent<IStyledButton>;
 
 export type ITransformControlsType = "translate" | "rotate" | "scale";
@@ -297,7 +317,9 @@ export interface IimageToBelabelled {
 }
 
 interface listUnfinishedImagesQuery {
-  listUnfinishedImages: IimageToBelabelled[];
+  imagesByFinished: {
+    items: IimageToBelabelled[];
+  };
 }
 
 export default ImageToModalMapper;

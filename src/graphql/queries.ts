@@ -20,7 +20,7 @@ export const getImage = `query GetImage($id: ID!) {
 }
 `;
 export const listImages = `query ListImages(
-  $filter: TableImageFilterInput
+  $filter: ModelImageFilterInput
   $limit: Int
   $nextToken: String
 ) {
@@ -44,21 +44,34 @@ export const listImages = `query ListImages(
   }
 }
 `;
-export const listUnfinishedImages = `query ListUnfinishedImages {
-  listUnfinishedImages {
-    id
-    imageUrl
-    modelUrl
-    translateX
-    translateY
-    translateZ
-    rotateX
-    rotateY
-    rotateZ
-    scaleX
-    scaleY
-    scaleZ
-    finished
+export const imagesByFinished = `query ImagesByFinished(
+  $finished: String
+  $filter: ModelImageFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  imagesByFinished(
+    finished: $finished
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
+    items {
+      id
+      imageUrl
+      modelUrl
+      translateX
+      translateY
+      translateZ
+      rotateX
+      rotateY
+      rotateZ
+      scaleX
+      scaleY
+      scaleZ
+      finished
+    }
+    nextToken
   }
 }
 `;
