@@ -8,7 +8,10 @@ import { Query, Mutation } from "react-apollo";
 import { imagesByFinished } from "../../graphql/queries";
 import { updateImage } from "../../graphql/mutations";
 import gql from "graphql-tag";
-import { UpdateImageMutation, UpdateImageMutationVariables } from "../../API";
+import {
+  UpdateImageMutation,
+  UpdateImageMutationVariables
+} from "../../graphql/API";
 
 //components
 import Test from "./vis";
