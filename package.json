@@ -17,7 +17,7 @@
     "react": "^16.8.6",
     "react-apollo": "^2.5.4",
     "react-dom": "^16.8.6",
-    "react-scripts": "^3.0.1",
+    "react-scripts": "^5.0.1",
     "react-sizeme": "^2.6.7",
     "three": "^0.105.2",
     "typescript": "3.4.3"
@@ -40,7 +40,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@storybook/react": "^5.0.9",
+    "@storybook/react": "^6.5.13",
     "@types/enzyme": "^3.9.1",
     "@types/storybook__react": "^4.0.1",
     "@types/styled-components": "^4.1.14",
